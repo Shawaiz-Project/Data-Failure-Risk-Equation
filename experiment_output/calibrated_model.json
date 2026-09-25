@@ -1,0 +1,25 @@
+{
+  "lam": 1.0,
+  "gamma": 2.0,
+  "weights": {
+    "freshness": 0.8,
+    "volume": 0.5,
+    "schema": 1.0,
+    "outliers": 0.5
+  },
+  "policy": {
+    "low_max": 0.08,
+    "moderate_max": 0.16,
+    "high_max": 0.24,
+    "actions": {
+      "LOW": "continue_normal_monitoring",
+      "MODERATE": "open_investigation_alert",
+      "HIGH": "human_review_and_quarantine",
+      "CRITICAL": "block_batch_and_page_oncall"
+    }
+  },
+  "metadata": {
+    "model_version": "demo-1"
+  },
+  "version": 2
+}
