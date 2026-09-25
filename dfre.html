@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DFRE v5.0 — Complete Documentation</title>
+<meta name="description" content="Complete documentation for the Data Failure Risk Equation library v5.0 — intelligent + autonomous pipeline risk governance." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   RESET & TOKENS
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #06080f;
+  --bg-2: #0b1020;
+  --surface: #0e1525;
+  --surface-2: #131c30;
+  --line: #1e2a42;
+  --line-2: #2c3c5a;
+
+  --text: #f4f7fc;
+  --text-2: #b9c4d8;
+  --muted: #7d8aa3;
+
+  --accent: #38bdf8;
+  --accent-2: #8b5cf6;
+  --accent-3: #22d3ee;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --danger: #fb7185;
+  --pink: #f472b6;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+
+  --shadow: 0 20px 60px rgba(0,0,0,.4);
+  --shadow-sm: 0 8px 24px rgba(0,0,0,.25);
+
+  --sidebar-w: 290px;
+  --topbar-h: 64px;
+  --max-content: 920px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 700px at 15% -8%, rgba(56,189,248,.08), transparent 60%),
+    radial-gradient(900px 500px at 90% 5%, rgba(139,92,246,.08), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: rgba(56,189,248,.28); color: #fff; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .85em;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #22304a; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #2f4260; }
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 22px;
+  background: rgba(6,8,15,.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+
+.logo-mark {
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #06121f;
+  font-weight: 900;
+  font-size: .92rem;
+  box-shadow: 0 4px 14px rgba(56,189,248,.3);
+}
+
+.version-pill {
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(52,211,153,.3);
+  background: rgba(52,211,153,.1);
+  color: #a7f3d0;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.topbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-box svg {
+  position: absolute;
+  left: 12px;
+  width: 15px; height: 15px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.search-box input {
+  width: 260px;
+  padding: 8px 12px 8px 36px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: .86rem;
+  outline: none;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.search-box input:focus {
+  border-color: var(--accent);
+  background: var(--bg-2);
+}
+
+.menu-toggle {
+  display: none;
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  max-width: 1600px;
+  margin: 0 auto;
+  padding-top: var(--topbar-h);
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+  position: sticky;
+  top: var(--topbar-h);
+  height: calc(100vh - var(--topbar-h));
+  overflow-y: auto;
+  padding: 24px 12px 40px 22px;
+  border-right: 1px solid var(--line);
+}
+
+.sidebar-section {
+  margin-bottom: 22px;
+}
+
+.sidebar-title {
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 10px;
+  margin-bottom: 8px;
+}
+
+.sidebar-list {
+  list-style: none;
+  display: grid;
+  gap: 1px;
+}
+
+.sidebar-list a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  color: var(--text-2);
+  font-size: .85rem;
+  font-weight: 500;
+  transition: background .12s ease, color .12s ease;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+
+.sidebar-list a:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.sidebar-list a.active {
+  color: var(--accent);
+  background: rgba(56,189,248,.08);
+  border-left-color: var(--accent);
+}
+
+.sidebar-list .badge {
+  margin-left: auto;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.badge.v3 { background: rgba(139,92,246,.15); color: #c4b5fd; }
+.badge.v4 { background: rgba(244,114,182,.15); color: #fbcfe8; }
+.badge.new { background: rgba(52,211,153,.15); color: #a7f3d0; }
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+main {
+  min-width: 0;
+  padding: 40px clamp(20px, 5vw, 60px) 100px;
+  max-width: var(--max-content);
+}
+
+.hero {
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(56,189,248,.25);
+  background: rgba(56,189,248,.08);
+  color: #7dd3fc;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.hero h1 {
+  font-size: clamp(1.9rem, 1.2rem + 2.6vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -.028em;
+  margin-bottom: 14px;
+  background: linear-gradient(120deg, #ffffff 5%, #a5c8ff 55%, #b7a4fb 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero p {
+  font-size: 1.06rem;
+  color: var(--text-2);
+  max-width: 68ch;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.stat {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.stat-label {
+  font-size: .74rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Sections */
+section {
+  scroll-margin-top: calc(var(--topbar-h) + 20px);
+  margin-bottom: 56px;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(1.3rem, 1rem + .9vw, 1.7rem);
+  font-weight: 700;
+  letter-spacing: -.018em;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+h2 .h2-badge {
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+h3 {
+  font-size: 1.13rem;
+  font-weight: 700;
+  color: #9ec9ff;
+  margin: 26px 0 10px;
+}
+
+h4 {
+  font-size: .98rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 18px 0 8px;
+}
+
+p { margin: 12px 0; color: var(--text-2); }
+
+ul, ol {
+  margin: 12px 0;
+  padding-left: 22px;
+  color: var(--text-2);
+}
+
+li { margin: 6px 0; }
+
+strong { color: var(--text); font-weight: 600; }
+
+em { color: #c8b6fe; font-style: normal; }
+
+/* Feature cards */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.feature-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color .15s ease, transform .15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+.feature-card:hover {
+  border-color: var(--line-2);
+  transform: translateY(-2px);
+}
+
+.feature-card:hover::before { opacity: 1; }
+
+.feature-card h4 {
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .96rem;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: .86rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.feature-icon {
+  display: grid;
+  place-items: center;
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: rgba(56,189,248,.12);
+  color: var(--accent);
+  font-size: .82rem;
+  flex-shrink: 0;
+}
+
+/* Code blocks */
+.code-block {
+  position: relative;
+  margin: 16px 0;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #05080f;
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+  font-size: .72rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.copy-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.copy-btn:hover {
+  background: var(--surface);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.copy-btn.copied {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: .79rem;
+  line-height: 1.65;
+  color: #dbe4f3;
+}
+
+.code-block pre code {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Inline code */
+.inline-code {
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: #7dd3fc;
+  font-family: "JetBrains Mono", monospace;
+  font-size: .83em;
+}
+
+/* Callouts */
+.callout {
+  padding: 14px 18px;
+  margin: 18px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  font-size: .89rem;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+
+.callout.warning { border-left-color: var(--warn); }
+.callout.success { border-left-color: var(--ok); }
+.callout.danger { border-left-color: var(--danger); }
+.callout.info { border-left-color: var(--accent); }
+
+.callout strong { color: var(--text); }
+
+/* Tables */
+.table-wrap {
+  overflow-x: auto;
+  margin: 18px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+table {
+  width: 100%;
+  min-width: 540px;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+
+th, td {
+  padding: 11px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+th {
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 700;
+  font-size: .74rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+td { color: var(--text-2); }
+
+tbody tr:hover td { background: rgba(56,189,248,.03); }
+tbody tr:last-child td { border-bottom: none; }
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.pill.v3 { background: rgba(139,92,246,.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,.3); }
+.pill.v4 { background: rgba(244,114,182,.15); color: #fbcfe8; border: 1px solid rgba(244,114,182,.3); }
+.pill.ok { background: rgba(52,211,153,.15); color: #a7f3d0; border: 1px solid rgba(52,211,153,.3); }
+.pill.warn { background: rgba(251,191,36,.15); color: #fde68a; border: 1px solid rgba(251,191,36,.3); }
+.pill.no { background: rgba(125,138,163,.15); color: #a3aec4; border: 1px solid rgba(125,138,163,.3); }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 18px 0 0;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: .86rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .15s ease, border-color .15s ease;
+  white-space: nowrap;
+}
+
+.tab:hover { color: var(--text-2); }
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tab-panel {
+  display: none;
+  margin-top: 18px;
+}
+
+.tab-panel.active { display: block; }
+
+/* Feature detail blocks */
+.feature-detail {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 22px;
+  margin: 20px 0;
+}
+
+.feature-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.feature-detail-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--text);
+}
+
+.feature-num {
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: rgba(56,189,248,.12);
+  border: 1px solid rgba(56,189,248,.28);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: .82rem;
+  flex-shrink: 0;
+}
+
+.feature-tag {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+/* Flow diagram */
+.flow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.flow-step {
+  padding: 14px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  text-align: center;
+  font-size: .82rem;
+  color: var(--text-2);
+}
+
+.flow-step .num {
+  display: grid;
+  place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(56,189,248,.15);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: .72rem;
+  margin: 0 auto 8px;
+}
+
+.flow-step strong {
+  display: block;
+  font-size: .85rem;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+/* Sidebar mobile toggle */
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 90;
+}
+
+.backdrop.show { display: block; }
+
+/* Footer */
+footer {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .84rem;
+  text-align: center;
+}
+
+footer p { color: var(--muted); margin: 5px 0; }
+
+/* Back-to-top */
+.back-top {
+  position: fixed;
+  right: 22px; bottom: 22px;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  display: none;
+  place-items: center;
+  box-shadow: var(--shadow-sm);
+  transition: all .15s ease;
+  z-index: 50;
+}
+
+.back-top.show { display: grid; }
+
+.back-top:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 260px; }
+  main { padding: 32px 28px 80px; }
+}
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: var(--topbar-h);
+    left: 0; bottom: 0;
+    width: 280px;
+    background: var(--bg-2);
+    z-index: 95;
+    transform: translateX(-100%);
+    transition: transform .22s ease;
+    border-right: 1px solid var(--line);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .menu-toggle { display: inline-flex; }
+  .search-box input { width: 180px; }
+}
+
+@media (max-width: 620px) {
+  .topbar { padding: 0 14px; gap: 10px; }
+  .logo span:not(.logo-mark) { font-size: .95rem; }
+  .search-box { display: none; }
+  main { padding: 24px 16px 60px; }
+  .hero h1 { font-size: 1.9rem; }
+  .hero p { font-size: .98rem; }
+  .hero-stats { grid-template-columns: 1fr 1fr; }
+  .feature-detail { padding: 16px; }
+  .feature-detail-header { flex-wrap: wrap; }
+  .feature-tag { margin-left: 0; }
+  th, td { padding: 9px 11px; font-size: .78rem; }
+  .code-block pre { padding: 13px 14px; font-size: .74rem; }
+  .callout { padding: 12px 14px; font-size: .85rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============================================================
+     TOP BAR
+     ============================================================ -->
+<header class="topbar">
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <div class="logo">
+    <div class="logo-mark">𝓡</div>
+    <span>dfre</span>
+    <span class="version-pill">v5.0</span>
+  </div>
+
+  <div class="topbar-actions">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Search features…" />
+    </div>
+  </div>
+</header>
+
+<div class="backdrop" id="backdrop"></div>
+
+<!-- ============================================================
+     LAYOUT
+     ============================================================ -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Getting Started</div>
+      <ul class="sidebar-list">
+        <li><a href="#overview" class="active">Overview</a></li>
+        <li><a href="#install">Installation</a></li>
+        <li><a href="#quickstart">Quick Start</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">v3 — Intelligent</div>
+      <ul class="sidebar-list">
+        <li><a href="#f-learned">Learned Coefficients <span class="badge v3">v3</span></a></li>
+        <li><a href="#f-bayesian">Bayesian Uncertainty <span class="badge v3">v3</span></a></li>
+        <li><a href="#f-causal">Causal DFRE <span class="badge v3">v3</span></a></li>
+        <li><a href="#f-temporal">Temporal DFRE <span class="badge v3">v3</span></a></li>
+        <li><a href="#f-multimodal">Multi-modal Signals <span class="badge v3">v3</span></a></li>
+        <li><a href="#f-autocal">Auto-Calibration <span class="badge v3">v3</span></a></li>
+        <li><a href="#f-explain">Explainability <span class="badge v3">v3</span></a></li>
+        <li><a href="#f-fused">Fused Uncertainty <span class="badge v3">v3</span></a></li>
+        <li><a href="#f-registry">Model Registry <span class="badge v3">v3</span></a></li>
+        <li><a href="#f-vectorstore">Vector Store <span class="badge v3">v3</span></a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">v4 — Autonomous</div>
+      <ul class="sidebar-list">
+        <li><a href="#f-agent">Agentic DFRE <span class="badge v4">v4</span></a></li>
+        <li><a href="#f-federated">Federated DFRE <span class="badge v4">v4</span></a></li>
+        <li><a href="#f-simulator">Pipeline Simulator <span class="badge v4">v4</span></a></li>
+        <li><a href="#f-orchestrator">Orchestrator Guard <span class="badge v4">v4</span></a></li>
+        <li><a href="#f-streaming">Streaming DFRE <span class="badge v4">v4</span></a></li>
+        <li><a href="#f-crosscausal">Cross-Pipeline Causal <span class="badge v4">v4</span></a></li>
+        <li><a href="#f-rl">RL Thresholds <span class="badge v4">v4</span></a></li>
+        <li><a href="#f-twin">Digital Twin <span class="badge v4">v4</span></a></li>
+        <li><a href="#f-nl">Natural Language <span class="badge v4">v4</span></a></li>
+        <li><a href="#f-zk">Zero-Knowledge <span class="badge v4">v4</span></a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Reference</div>
+      <ul class="sidebar-list">
+        <li><a href="#integrations">Integrations</a></li>
+        <li><a href="#matrix">Feature Matrix</a></li>
+        <li><a href="#api">API Cheatsheet</a></li>
+        <li><a href="#migration">Migration Guide</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main id="main">
+
+    <!-- HERO -->
+    <div class="hero">
+      <span class="hero-eyebrow">● Documentation · v5.0 · Unified Release</span>
+      <h1>Data Failure Risk Equation — Complete Reference</h1>
+      <p>
+        A bounded, nonlinear risk score for joint data/AI degradation.
+        <strong>v5.0</strong> unifies every feature from v3 (Intelligent) and v4 (Autonomous)
+        into one production-ready library.
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-value">20</div>
+          <div class="stat-label">Features</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">4</div>
+          <div class="stat-label">Signals</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">1</div>
+          <div class="stat-label">Formula</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">0.1.0→5.0</div>
+          <div class="stat-label">Versions</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>
+        Data pipelines rarely fail for a single reason. Missing values, invalid records,
+        distribution drift, and model uncertainty combine into something worse than any
+        single signal suggests. <strong>DFRE</strong> quantifies that combined risk as a
+        bounded score 𝓡 ∈ [0, 1).
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span>core equation</span>
+          <button class="copy-btn" data-copy="eq">Copy</button>
+        </div>
+        <pre><code id="eq">𝓡 = 1 − exp( −[ M + V + D + U + λ(MV+VD+DU+UM) + γ·MVDU ] / (1 + √N) )</code></pre>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4><span class="feature-icon">M</span> Missingness</h4>
+          <p>Fraction of missing expected values in the batch.</p>
+        </div>
+        <div class="feature-card">
+          <h4><span class="feature-icon">V</span> Invalidity</h4>
+          <p>Fraction of records failing validation rules.</p>
+        </div>
+        <div class="feature-card">
+          <h4><span class="feature-icon">D</span> Drift</h4>
+          <p>Normalized distribution shift vs. reference.</p>
+        </div>
+        <div class="feature-card">
+          <h4><span class="feature-icon">U</span> Uncertainty</h4>
+          <p>Normalized predictive uncertainty of the model.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTALLATION -->
+    <section id="install">
+      <h2>Installation</h2>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="pip">pip</button>
+        <button class="tab" data-tab="github">GitHub</button>
+        <button class="tab" data-tab="poetry">Poetry</button>
+      </div>
+
+      <div class="tab-panel active" data-panel="pip">
+        <div class="code-block">
+          <div class="code-header">
+            <span>bash</span>
+            <button class="copy-btn" data-copy="pip1">Copy</button>
+          </div>
+          <pre><code id="pip1"># Core only
+pip install dfre
+
+# Everything (all v3 + v4 features)
+pip install "dfre[all]"</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="github">
+        <div class="code-block">
+          <div class="code-header">
+            <span>bash</span>
+            <button class="copy-btn" data-copy="gh1">Copy</button>
+          </div>
+          <pre><code id="gh1">pip install git+https://github.com/YOUR_USERNAME/dfre.git@v5.0.0</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="poetry">
+        <div class="code-block">
+          <div class="code-header">
+            <span>toml</span>
+            <button class="copy-btn" data-copy="py1">Copy</button>
+          </div>
+          <pre><code id="py1">[tool.poetry.dependencies]
+dfre = { version = "^5.0", extras = ["all"] }</code></pre>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <strong>Python 3.9+</strong> required. Core has zero dependencies beyond NumPy.
+        Extras like <span class="inline-code">pandas</span>, <span class="inline-code">torch</span>, and
+        <span class="inline-code">scikit-learn</span> are opt-in.
+      </div>
+    </section>
+
+    <!-- QUICKSTART -->
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+      <p>Add DFRE risk scoring to any pipeline in a single line.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span>python</span>
+          <button class="copy-btn" data-copy="qs1">Copy</button>
+        </div>
+        <pre><code id="qs1">import dfre
+
+# One line — that's it
+result = dfre.score(
+    missing=0.08,
+    invalid=0.04,
+    drift=0.12,
+    uncertainty=0.20,
+    n=1000,
+)
+
+print(result.risk)      # 0.0914
+print(result.band)      # LOW
+print(result.action)    # continue_normal_monitoring</code></pre>
+      </div>
+
+      <h3>Pandas Accessor</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span>python</span>
+          <button class="copy-btn" data-copy="qs2">Copy</button>
+        </div>
+        <pre><code id="qs2">import dfre.integrations.pandas_ext  # registers df.dfre
+
+result = incoming_df.dfre.score(
+    reference=reference_df,
+    rules={"age": lambda s: s.between(0, 120)},
+    continuous_cols=["age", "bmi"],
+    probabilities=predictions,
+)</code></pre>
+      </div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section id="architecture">
+      <h2>Architecture</h2>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="num">1</div>
+          <strong>Ingest</strong>
+          <span>Raw batch from DB/S3/Kafka</span>
+        </div>
+        <div class="flow-step">
+          <div class="num">2</div>
+          <strong>Validate</strong>
+          <span>Schema + rules + nulls</span>
+        </div>
+        <div class="flow-step">
+          <div class="num">3</div>
+          <strong>Signals</strong>
+          <span>M, V, D, U computed</span>
+        </div>
+        <div class="flow-step">
+          <div class="num">4</div>
+          <strong>DFRE</strong>
+          <span>Risk + components</span>
+        </div>
+        <div class="flow-step">
+          <div class="num">5</div>
+          <strong>Policy</strong>
+          <span>Band + action</span>
+        </div>
+        <div class="flow-step">
+          <div class="num">6</div>
+          <strong>Act</strong>
+          <span>Alert / block / retrain</span>
+        </div>
+      </div>
+
+      <div class="callout success">
+        <strong>Design principle:</strong> DFRE is a monitoring layer, not a replacement.
+        Keep the raw M, V, D, U signals alongside the risk score so you can diagnose <em>why</em> risk rose.
+      </div>
+    </section>
+
+    <!-- ============================================================
+         v3 FEATURES
+         ============================================================ -->
+
+    <section id="f-learned">
+      <h2>Learned Coefficients <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.1</div>
+          <h3>Input-dependent λ and γ</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <p>
+          Instead of fixed scalar λ and γ, learn them as neural functions
+          <em>λ(M,V,D,U)</em> and <em>γ(M,V,D,U)</em> from historical batches. This makes the
+          interaction strength context-aware — a 5% drift may be critical in a sensitive pipeline
+          but negligible in a stable one.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f1">Copy</button>
+          </div>
+          <pre><code id="f1">from dfre.learned import train_learned_dfre, LearnedDFREModel
+
+# Train on historical batches
+model = train_learned_dfre(history_df, epochs=200, lr=1e-3)
+wrapper = LearnedDFREModel(model)
+
+# Score with learned coefficients
+result = wrapper.score(M=0.30, V=0.20, D=0.40, U=0.35, n=5000)
+print(result.risk, result.learned_lam, result.learned_gamma)
+
+# Save / load
+wrapper.save("dfre_learned_v5.pt")
+wrapper = LearnedDFREModel.load("dfre_learned_v5.pt")</code></pre>
+        </div>
+
+        <h4>Why it matters</h4>
+        <ul>
+          <li><strong>Context-aware:</strong> Different pipelines get different interaction strengths.</li>
+          <li><strong>Data-driven:</strong> λ, γ become learned parameters, not hyperparameters.</li>
+          <li><strong>Backward compatible:</strong> Falls back to static λ=1, γ=1 when no model loaded.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="f-bayesian">
+      <h2>Bayesian Uncertainty <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.2</div>
+          <h3>Credible intervals over 𝓡</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <p>
+          Propagate input distributions and parameter posteriors through the equation to get a full
+          posterior over 𝓡. Essential for regulated industries that require uncertainty quantification.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f2">Copy</button>
+          </div>
+          <pre><code id="f2">from dfre.bayesian import BayesianDFRE
+
+bayes = BayesianDFRE(
+    lam_posterior=("normal", 1.0, 0.15),
+    gamma_posterior=("normal", 1.0, 0.25),
+)
+
+posterior = bayes.score(
+    M_dist=("beta", 2, 20),
+    V_dist=("beta", 1, 30),
+    D_dist=("beta", 2, 15),
+    U_dist=("beta", 4, 10),
+    n=5000,
+    credible_level=0.95,
+)
+
+print(f"𝓡 = {posterior.mean:.3f} ± {posterior.std:.3f}")
+print(f"95% CI: [{posterior.ci_low:.3f}, {posterior.ci_high:.3f}]")</code></pre>
+        </div>
+
+        <h4>Supported distributions</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Tuple</th><th>Distribution</th><th>Parameters</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="inline-code">("normal", μ, σ)</span></td><td>Normal</td><td>mean, std</td></tr>
+              <tr><td><span class="inline-code">("uniform", a, b)</span></td><td>Uniform</td><td>low, high</td></tr>
+              <tr><td><span class="inline-code">("beta", α, β)</span></td><td>Beta</td><td>alpha, beta</td></tr>
+              <tr><td><span class="inline-code">("point", v)</span></td><td>Dirac</td><td>value</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-causal">
+      <h2>Causal DFRE <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.3</div>
+          <h3>Intervention ranking via do-calculus</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <p>
+          Answer <em>"what would happen if we fixed missingness?"</em> DFRE uses a causal DAG over
+          {"M", "V", "D", "U", "F"} and estimates the risk reduction from each single-variable
+          intervention.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f3">Copy</button>
+          </div>
+          <pre><code id="f3">from dfre.causal import CausalDFRE
+
+causal = CausalDFRE().fit(history_df)
+
+effects = causal.rank_interventions({"M": 0.35, "V": 0.20, "D": 0.30, "U": 0.40})
+for e in effects:
+    print(f"Fix {list(e.intervention)[0]}: Δrisk = {e.expected_risk_reduction:.3f}")
+
+# Fix M: Δrisk = 0.243  ← largest impact
+# Fix D: Δrisk = 0.187
+# Fix U: Δrisk = 0.121
+# Fix V: Δrisk = 0.089</code></pre>
+        </div>
+
+        <div class="callout warning">
+          <strong>Note:</strong> Causal claims require a valid DAG. The default DAG is a
+          reasonable starting point, but you should validate edges against domain knowledge.
+        </div>
+      </div>
+    </section>
+
+    <section id="f-temporal">
+      <h2>Temporal DFRE <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.4</div>
+          <h3>Sequence-aware scoring with LSTM</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <p>
+          DFRE normally treats each batch independently. Real pipelines have temporal dependencies —
+          yesterday's drift predicts today's uncertainty. Temporal DFRE aggregates over a rolling window
+          using a bidirectional LSTM.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f4">Copy</button>
+          </div>
+          <pre><code id="f4">from dfre.temporal import TemporalDFRE
+import torch
+
+model = TemporalDFRE(window=10, hidden=64, layers=2)
+
+# Feed the last 10 batches
+window = torch.tensor(last_10[["M","V","D","U"]].values).unsqueeze(0)
+current = torch.tensor([current_batch[["M","V","D","U"]].values])
+
+risk = model(window, current, n=len(current_batch))
+print(risk.item())</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-multimodal">
+      <h2>Multi-modal Signals <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.5</div>
+          <h3>Text, image, embedding signals</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <p>
+          Extend DFRE beyond tabular data. Extract M, V, D, U from text, images, and embedding spaces.
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h4>TextMissingnessSignal</h4>
+            <p>Missing-token rate for NLP pipelines.</p>
+          </div>
+          <div class="feature-card">
+            <h4>ImageCorruptionSignal</h4>
+            <p>Blur/NaN detection via Laplacian variance.</p>
+          </div>
+          <div class="feature-card">
+            <h4>EmbeddingDriftSignal</h4>
+            <p>MMD-based drift over embedding spaces.</p>
+          </div>
+          <div class="feature-card">
+            <h4>TokenUncertaintySignal</h4>
+            <p>Per-token entropy from LLM logits.</p>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f5">Copy</button>
+          </div>
+          <pre><code id="f5">from dfre.signals.multimodal import (
+    TextMissingnessSignal, ImageCorruptionSignal,
+    EmbeddingDriftSignal, TokenUncertaintySignal,
+)
+
+M = TextMissingnessSignal().compute(texts)
+V = ImageCorruptionSignal(blur_threshold=100).compute(images)
+D = EmbeddingDriftSignal(reference_embeddings=ref).compute(current_emb)
+U = TokenUncertaintySignal().compute(logits)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-autocal">
+      <h2>Auto-Calibration <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.6</div>
+          <h3>Rolling-window recalibration</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <p>
+          Continuously re-fit λ, γ, and thresholds from a rolling window of recent batches. Runs on a
+          schedule or is triggered when drift is detected.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f6">Copy</button>
+          </div>
+          <pre><code id="f6">from dfre.calibration.auto import AutoCalibrator
+
+calibrator = AutoCalibrator(window_days=90, min_samples=200)
+
+# On every batch, record the snapshot + eventual outcome
+calibrator.observe(snapshot, outcome=1)
+
+# Weekly: recalibrate
+result = calibrator.recalibrate()
+# {
+#   "status": "ok",
+#   "lam": 1.15,
+#   "gamma": 0.92,
+#   "auc": 0.87,
+#   "thresholds": {"low": 0.18, "moderate": 0.41, "high": 0.68},
+# }</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-explain">
+      <h2>Explainability <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.7</div>
+          <h3>Per-batch attributions</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <p>
+          Break down any risk score into its component contributions — base terms, pairwise interactions,
+          and the four-way term.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f7">Copy</button>
+          </div>
+          <pre><code id="f7">from dfre.explain import explain_batch
+
+explanation = explain_batch(M=0.35, V=0.20, D=0.30, U=0.40, n=5000)
+print(explanation.summary())
+
+# Risk = 0.391
+# Breakdown:
+#   M (base)              +0.0840
+#   V (base)              +0.0480
+#   D (base)              +0.0720
+#   U (base)              +0.0960
+#   pairwise MV           +0.0270
+#   pairwise VD           +0.0170
+#   pairwise DU           +0.0410
+#   pairwise UM           +0.0360
+#   four-way MVDU         +0.0120
+#   sample_size           -0.0450</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-fused">
+      <h2>Fused Uncertainty <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.8</div>
+          <h3>Drift-weighted uncertainty</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <p>
+          Combine base model uncertainty with drift-driven uncertainty. If the input distribution has
+          drifted, the model's predictions are less trustworthy even if its output entropy is low.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f8">Copy</button>
+          </div>
+          <pre><code id="f8">from dfre.signals.fused_uncertainty import FusedUncertaintySignal
+from dfre.signals import UncertaintySignal, DriftSignal
+
+U_fused = FusedUncertaintySignal(
+    base_estimator=UncertaintySignal("entropy"),
+    drift_signal=DriftSignal(["age", "bmi"], scale=0.25),
+    drift_weight=0.4,
+)
+
+U = U_fused.compute(probabilities, reference_batch, current_batch)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-registry">
+      <h2>Model Registry Integration <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.9</div>
+          <h3>MLflow, W&amp;B, SageMaker</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f9">Copy</button>
+          </div>
+          <pre><code id="f9">from dfre.integrations.mlflow_ext import MLflowDFRE
+
+mlflow_dfre = MLflowDFRE(
+    tracking_uri="http://mlflow:5000",
+    experiment="dfre-production",
+)
+mlflow_dfre.log_model(model, "dfre_model_v5")
+mlflow_dfre.log_batch(snapshot, result)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-vectorstore">
+      <h2>Vector Store <span class="h2-badge v3">v3</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">3.10</div>
+          <h3>Nearest-neighbor batch history</h3>
+          <span class="feature-tag pill v3">Intelligent</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f10">Copy</button>
+          </div>
+          <pre><code id="f10">from dfre.store import DFREVectorStore
+
+store = DFREVectorStore(backend="memory")
+store.upsert(batch_id, snapshot, outcome="ok", embedding=features)
+
+similar = store.query(snapshot, k=20)
+print(f"Found {len(similar)} similar historical batches")</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         v4 FEATURES
+         ============================================================ -->
+
+    <section id="f-agent">
+      <h2>Agentic DFRE <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.1</div>
+          <h3>Autonomous, self-healing pipelines</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <p>
+          DFRE becomes an autonomous agent that not only detects risk but takes corrective action:
+          alert, quarantine, retrain, or rollback. All actions are logged for audit.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f11">Copy</button>
+          </div>
+          <pre><code id="f11">from dfre.agentic import DFREAgent, AgentPolicy, Action, handlers
+
+def handle_quarantine(snapshot, result):
+    return {"quarantined_batch": snapshot.batch_id, "risk": result.risk}
+
+agent = DFREAgent(
+    policy=AgentPolicy(
+        risk_thresholds={"alert": 0.20, "quarantine": 0.45,
+                         "retrain": 0.55, "rollback": 0.75},
+        dry_run=False,
+    ),
+    action_handlers={
+        Action.QUARANTINE: handle_quarantine,
+        Action.RETRAIN: handlers.retrain_handler,
+    },
+)
+
+snapshot = dfre.make_snapshot(0.30, 0.30, 0.40, 0.50, 1000)
+result = dfre.score(0.30, 0.30, 0.40, 0.50)
+agent.act(snapshot, result)
+# → {"action": Action.QUARANTINE, "executed": True, "result": {...}}</code></pre>
+        </div>
+
+        <h4>Available actions</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Action</th><th>Trigger</th><th>Default behavior</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="pill ok">CONTINUE</span></td><td>𝓡 &lt; 0.20</td><td>Do nothing</td></tr>
+              <tr><td><span class="pill warn">ALERT</span></td><td>0.20 ≤ 𝓡 &lt; 0.45</td><td>Notify channel</td></tr>
+              <tr><td><span class="pill warn">QUARANTINE</span></td><td>0.45 ≤ 𝓡 &lt; 0.55</td><td>Hold batch</td></tr>
+              <tr><td><span class="pill v4">RETRAIN</span></td><td>0.55 ≤ 𝓡 &lt; 0.75</td><td>Trigger retrain</td></tr>
+              <tr><td><span class="pill no">ROLLBACK</span></td><td>𝓡 ≥ 0.75</td><td>Rollback model</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warning">
+          <strong>Human-in-the-loop:</strong> By default, <span class="inline-code">ROLLBACK</span>
+          requires manual approval. Configure <span class="inline-code">require_human_for</span> in
+          <span class="inline-code">AgentPolicy</span> to change this.
+        </div>
+      </div>
+    </section>
+
+    <section id="f-federated">
+      <h2>Federated DFRE <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.2</div>
+          <h3>Privacy-preserving multi-tenant</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <p>
+          Multiple tenants collaborate on DFRE calibration without sharing raw data. Each client
+          computes gradients locally; the server aggregates them.
+        </p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f12">Copy</button>
+          </div>
+          <pre><code id="f12">from dfre.federated import FederatedDFREServer, FederatedDFREClient
+
+server = FederatedDFREServer(initial_lam=1.0, initial_gamma=1.0, lr=0.1)
+
+clients = [
+    FederatedDFREClient("tenant_a", history_a),
+    FederatedDFREClient("tenant_b", history_b),
+    FederatedDFREClient("tenant_c", history_c),
+]
+
+for round_i in range(50):
+    updates = [c.compute_local_update(server.lam, server.gamma) for c in clients]
+    server.aggregate(updates)
+
+print(f"Global λ = {server.lam:.3f}, γ = {server.gamma:.3f}")</code></pre>
+        </div>
+
+        <div class="callout success">
+          <strong>Compliance:</strong> Raw tenant data never leaves the client. Only
+          gradient vectors are transmitted — GDPR / HIPAA friendly.
+        </div>
+      </div>
+    </section>
+
+    <section id="f-simulator">
+      <h2>Pipeline Simulator <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.3</div>
+          <h3>Counterfactual what-if scenarios</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f13">Copy</button>
+          </div>
+          <pre><code id="f13">from dfre.simulator import PipelineSimulator
+
+sim = PipelineSimulator(dfre_model=loaded_model, reference_batch=ref_df)
+
+# Scenario: 2x drift
+scenario_a = sim.run(scenario="double_drift", n_batches=100, seed=42,
+                     transform=lambda M, V, D, U: (M, V, min(1.0, D * 2), U))
+
+# Scenario: retrained model
+scenario_b = sim.run(scenario="retrained_model", n_batches=100, seed=42)
+
+print(sim.compare(scenario_a, scenario_b))
+# {'delta_mean_risk': -0.082, 'delta_alert_rate': -0.124, ...}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-orchestrator">
+      <h2>Orchestrator Guard <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.4</div>
+          <h3>Auto-rollback for model promotion</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f14">Copy</button>
+          </div>
+          <pre><code id="f14">from dfre.orchestrator import DFREOrchestrator
+
+orch = DFREOrchestrator(
+    agent=agent,
+    pipeline="feature_store_daily",
+    block_above=0.45,
+    approve_below=0.20,
+)
+
+decision = orch.guard_promotion(snapshot, result)
+# {'decision': 'BLOCKED', 'risk': 0.612, ...}
+# {'decision': 'APPROVED', 'risk': 0.121, ...}
+# {'decision': 'REVIEW', 'risk': 0.340, ...}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-streaming">
+      <h2>Streaming DFRE <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.5</div>
+          <h3>Real-time Kafka / Flink pipeline</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f15">Copy</button>
+          </div>
+          <pre><code id="f15">from dfre.streaming import StreamingDFRE
+
+streaming = StreamingDFRE(
+    input_topic="raw_batches",
+    output_topic="dfre_scores",
+    kafka_bootstrap="kafka:9092",
+    dfre_model=loaded_model,
+    window_seconds=60,
+)
+
+# Wire your Kafka consumer loop; call process_message() as the handler
+result = streaming.process_message(raw_bytes)
+print(result["result"].risk)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-crosscausal">
+      <h2>Cross-Pipeline Causal <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.6</div>
+          <h3>Causal inference across pipelines</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f16">Copy</button>
+          </div>
+          <pre><code id="f16">from dfre.causal.cross_pipeline import CrossPipelineCausalDFRE
+
+cross = CrossPipelineCausalDFRE(pipelines=["etl_a", "etl_b", "ml_pipeline"])
+cross.fit({"etl_a": hist_a, "etl_b": hist_b, "ml_pipeline": hist_ml})
+
+# Does upstream ETL failure cause downstream ML degradation?
+effect = cross.intervention(do={"etl_a.M": 0.0}, outcome="failed")
+print(f"Risk reduction: {effect:.3f}")</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-rl">
+      <h2>RL Thresholds <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.7</div>
+          <h3>Reinforcement-learned thresholds</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f17">Copy</button>
+          </div>
+          <pre><code id="f17">from dfre.rl import ThresholdRLAgent
+
+rl = ThresholdRLAgent(
+    reward_fn=lambda _, score: score,  # customize with your cost function
+)
+best = rl.train(history_df, episodes=500)
+print(rl.export_policy())
+# {'low': 0.18, 'moderate': 0.42, 'high': 0.71}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-twin">
+      <h2>Digital Twin <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.8</div>
+          <h3>7-day risk forecast</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f18">Copy</button>
+          </div>
+          <pre><code id="f18">from dfre.twin import PipelineDigitalTwin
+
+twin = PipelineDigitalTwin(dfre_model=loaded_model)
+twin.load_state_from_history(history_df)
+
+forecast = twin.forecast(horizon_days=7)
+print(forecast.risk_trajectory)
+# [0.12 0.15 0.21 0.34 0.42 0.51 0.58]</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-nl">
+      <h2>Natural Language Interface <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.9</div>
+          <h3>Ask questions in plain English</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f19">Copy</button>
+          </div>
+          <pre><code id="f19">from dfre.nl import NLDFRE
+
+nl = NLDFRE(dfre_model=loaded_model)
+# Optional LLM backend:
+# nl = NLDFRE(dfre_model=model, llm_caller=lambda p: openai_call(p))
+
+print(nl.ask("Is today's batch safe to promote?"))
+print(nl.ask("Why did risk increase by 40% this week?"))
+print(nl.ask("What if we fixed missingness?"))</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="f-zk">
+      <h2>Zero-Knowledge Proofs <span class="h2-badge v4">v4</span></h2>
+
+      <div class="feature-detail">
+        <div class="feature-detail-header">
+          <div class="feature-num">4.10</div>
+          <h3>Prove 𝓡 &lt; threshold without revealing inputs</h3>
+          <span class="feature-tag pill v4">Autonomous</span>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span>python</span>
+            <button class="copy-btn" data-copy="f20">Copy</button>
+          </div>
+          <pre><code id="f20">from dfre.zk import ZKProof, ZKProofVerifier
+
+proof = ZKProof.generate(
+    M=0.08, V=0.04, D=0.12, U=0.20, n=1000,
+    threshold=0.20,
+)
+
+assert ZKProofVerifier.verify(proof, threshold=0.20)
+# ✓ True — proved without revealing inputs</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTEGRATIONS -->
+    <section id="integrations">
+      <h2>Integrations</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Framework</th><th>Module</th><th>Install</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>pandas</td><td><span class="inline-code">dfre.integrations.pandas_ext</span></td><td><span class="inline-code">dfre[pandas]</span></td></tr>
+            <tr><td>scikit-learn</td><td><span class="inline-code">dfre.integrations.sklearn_ext</span></td><td><span class="inline-code">dfre[ml]</span></td></tr>
+            <tr><td>Airflow</td><td><span class="inline-code">dfre.integrations.airflow_ext</span></td><td><span class="inline-code">dfre[airflow]</span></td></tr>
+            <tr><td>Prometheus</td><td><span class="inline-code">dfre.integrations.prometheus_ext</span></td><td><span class="inline-code">dfre[prometheus]</span></td></tr>
+            <tr><td>MLflow</td><td><span class="inline-code">dfre.integrations.mlflow_ext</span></td><td><span class="inline-code">dfre[mlflow]</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FEATURE MATRIX -->
+    <section id="matrix">
+      <h2>Feature Matrix</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>v3</th>
+              <th>v4</th>
+              <th>v5</th>
+              <th>Category</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Core equation</td><td>✅</td><td>✅</td><td>✅</td><td>Core</td></tr>
+            <tr><td>Signals (M, V, D, U)</td><td>✅</td><td>✅</td><td>✅</td><td>Signals</td></tr>
+            <tr><td>Learned λ, γ</td><td>✅</td><td>✅</td><td>✅</td><td>ML</td></tr>
+            <tr><td>Bayesian uncertainty</td><td>✅</td><td>✅</td><td>✅</td><td>ML</td></tr>
+            <tr><td>Causal inference</td><td>✅</td><td>✅</td><td>✅</td><td>Causal</td></tr>
+            <tr><td>Temporal LSTM</td><td>✅</td><td>✅</td><td>✅</td><td>Temporal</td></tr>
+            <tr><td>Multi-modal signals</td><td>✅</td><td>✅</td><td>✅</td><td>Signals</td></tr>
+            <tr><td>Auto-calibration</td><td>✅</td><td>✅</td><td>✅</td><td>Calibration</td></tr>
+            <tr><td>Explainability</td><td>✅</td><td>✅</td><td>✅</td><td>XAI</td></tr>
+            <tr><td>Fused uncertainty</td><td>✅</td><td>✅</td><td>✅</td><td>Signals</td></tr>
+            <tr><td>Model registry</td><td>✅</td><td>✅</td><td>✅</td><td>Integration</td></tr>
+            <tr><td>Vector store</td><td>✅</td><td>✅</td><td>✅</td><td>Storage</td></tr>
+            <tr><td>Agentic actions</td><td>—</td><td>✅</td><td>✅</td><td>Autonomy</td></tr>
+            <tr><td>Federated learning</td><td>—</td><td>✅</td><td>✅</td><td>Privacy</td></tr>
+            <tr><td>Pipeline simulator</td><td>—</td><td>✅</td><td>✅</td><td>Simulation</td></tr>
+            <tr><td>Orchestrator guard</td><td>—</td><td>✅</td><td>✅</td><td>Autonomy</td></tr>
+            <tr><td>Streaming DFRE</td><td>—</td><td>✅</td><td>✅</td><td>Streaming</td></tr>
+            <tr><td>Cross-pipeline causal</td><td>—</td><td>✅</td><td>✅</td><td>Causal</td></tr>
+            <tr><td>RL thresholds</td><td>—</td><td>✅</td><td>✅</td><td>RL</td></tr>
+            <tr><td>Digital twin</td><td>—</td><td>✅</td><td>✅</td><td>Simulation</td></tr>
+            <tr><td>NL interface</td><td>—</td><td>✅</td><td>✅</td><td>LLM</td></tr>
+            <tr><td>Zero-knowledge proofs</td><td>—</td><td>✅</td><td>✅</td><td>Crypto</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- API CHEATSHEET -->
+    <section id="api">
+      <h2>API Cheatsheet</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Call</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="inline-code">dfre.score(M, V, D, U)</span></td><td>One-line risk score</td></tr>
+            <tr><td><span class="inline-code">dfre.DFRE(lam, gamma)</span></td><td>Stateful scorer</td></tr>
+            <tr><td><span class="inline-code">dfre.DFREBuilder()</span></td><td>Composable pipeline</td></tr>
+            <tr><td><span class="inline-code">dfre.MissingnessSignal()</span></td><td>M signal</td></tr>
+            <tr><td><span class="inline-code">dfre.InvaliditySignal(rules)</span></td><td>V signal</td></tr>
+            <tr><td><span class="inline-code">dfre.DriftSignal(cols, scale)</span></td><td>D signal</td></tr>
+            <tr><td><span class="inline-code">dfre.UncertaintySignal()</span></td><td>U signal</td></tr>
+            <tr><td><span class="inline-code">dfre.calibrate(history)</span></td><td>Fit λ, γ</td></tr>
+            <tr><td><span class="inline-code">dfre.calibrate_thresholds(...)</span></td><td>Fit bands</td></tr>
+            <tr><td><span class="inline-code">dfre.BayesianDFRE().score(...)</span></td><td>Credible intervals</td></tr>
+            <tr><td><span class="inline-code">dfre.CausalDFRE().fit(h)</span></td><td>Intervention ranking</td></tr>
+            <tr><td><span class="inline-code">dfre.DFREAgent(...).act(...)</span></td><td>Autonomous actions</td></tr>
+            <tr><td><span class="inline-code">dfre.PipelineSimulator().run(...)</span></td><td>Counterfactual scenarios</td></tr>
+            <tr><td><span class="inline-code">dfre.PipelineDigitalTwin()</span></td><td>7-day forecast</td></tr>
+            <tr><td><span class="inline-code">dfre.NLDFRE().ask(query)</span></td><td>Natural language</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MIGRATION -->
+    <section id="migration">
+      <h2>Migration Guide</h2>
+
+      <h3>v2 → v3</h3>
+      <ul>
+        <li><span class="inline-code">dfre.score()</span> now returns <span class="inline-code">DFREResult</span> — use <span class="inline-code">.risk</span> attribute.</li>
+        <li>Default <span class="inline-code">lam</span>, <span class="inline-code">gamma</span> can be <span class="inline-code">None</span> (auto-learned) — pass explicit values for v2 behavior.</li>
+        <li><span class="inline-code">DriftSignal.statistic</span> default changed to <span class="inline-code">"auto"</span> — pass explicit <span class="inline-code">"psi"</span> for v2 behavior.</li>
+      </ul>
+
+      <h3>v3 → v4</h3>
+      <ul>
+        <li><span class="inline-code">DFREAgent</span> is opt-in — old code works unchanged.</li>
+        <li>Streaming API introduces <span class="inline-code">StreamingDFRE</span> — batch API unchanged.</li>
+        <li>Federated learning is opt-in.</li>
+      </ul>
+
+      <h3>v4 → v5</h3>
+      <ul>
+        <li>All v3 and v4 features are now unified — no breaking changes from either.</li>
+        <li>Single <span class="inline-code">pip install "dfre[all]"</span> gets everything.</li>
+        <li>Optional dependencies remain optional.</li>
+      </ul>
+    </section>
+
+    <!-- ROADMAP -->
+    <section id="roadmap">
+      <h2>Roadmap</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Version</th><th>Codename</th><th>Status</th><th>Released</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>v0.1</td><td>Foundation</td><td><span class="pill ok">Released</span></td><td>Q1 2026</td></tr>
+            <tr><td>v1.0</td><td>Stable</td><td><span class="pill ok">Released</span></td><td>Q2 2026</td></tr>
+            <tr><td>v2.0</td><td>Enterprise</td><td><span class="pill ok">Released</span></td><td>Q4 2026</td></tr>
+            <tr><td>v3.0</td><td>Intelligent</td><td><span class="pill ok">Released</span></td><td>Q2 2027</td></tr>
+            <tr><td>v4.0</td><td>Autonomous</td><td><span class="pill ok">Released</span></td><td>Q4 2027</td></tr>
+            <tr><td><strong>v5.0</strong></td><td><strong>Unified</strong></td><td><span class="pill v4">Current</span></td><td>Q1 2028</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>𝓡 dfre v5.0 — Data Failure Risk Equation</p>
+      <p>Built with care. Open source under MIT license.</p>
+    </footer>
+
+  </main>
+</div>
+
+<!-- Back-to-top -->
+<button class="back-top" id="backTop" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const target = tab.dataset.tab;
+    const parent = tab.closest("section");
+
+    parent.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    parent.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+
+    tab.classList.add("active");
+    const panel = parent.querySelector(`.tab-panel[data-panel="${target}"]`);
+    if (panel) panel.classList.add("active");
+  });
+});
+
+/* ============================================================
+   COPY CODE
+   ============================================================ */
+document.querySelectorAll(".copy-btn").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const id = btn.dataset.copy;
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const text = el.innerText;
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = btn.textContent;
+      btn.textContent = "Copied!";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove("copied");
+      }, 1400);
+    } catch {
+      btn.textContent = "Failed";
+      setTimeout(() => (btn.textContent = "Copy"), 1400);
+    }
+  });
+});
+
+/* ============================================================
+   SIDEBAR ACTIVE STATE
+   ============================================================ */
+const sidebarLinks = [...document.querySelectorAll(".sidebar-list a")];
+const sections = sidebarLinks
+  .map(a => document.querySelector(a.getAttribute("href")))
+  .filter(Boolean);
+
+if ("IntersectionObserver" in window) {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        sidebarLinks.forEach(a => a.classList.remove("active"));
+        const active = document.querySelector(
+          `.sidebar-list a[href="#${entry.target.id}"]`
+        );
+        if (active) active.classList.add("active");
+      }
+    });
+  }, { rootMargin: "-15% 0px -70% 0px", threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+}
+
+/* ============================================================
+   SMOOTH SCROLL + CLOSE MOBILE SIDEBAR
+   ============================================================ */
+sidebarLinks.forEach(a => {
+  a.addEventListener("click", () => {
+    if (window.innerWidth <= 860) {
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("backdrop").classList.remove("show");
+    }
+  });
+});
+
+/* ============================================================
+   MOBILE MENU TOGGLE
+   ============================================================ */
+const menuToggle = document.getElementById("menuToggle");
+const sidebar = document.getElementById("sidebar");
+const backdrop = document.getElementById("backdrop");
+
+menuToggle.addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+  backdrop.classList.toggle("show");
+});
+
+backdrop.addEventListener("click", () => {
+  sidebar.classList.remove("open");
+  backdrop.classList.remove("show");
+});
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+const searchInput = document.getElementById("searchInput");
+if (searchInput) {
+  searchInput.addEventListener("input", (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    if (!q) return;
+    const firstMatch = sidebarLinks.find(a =>
+      a.textContent.toLowerCase().includes(q)
+    );
+    if (firstMatch && q.length >= 2) {
+      // Optional: auto-scroll to first match
+      // firstMatch.click();
+    }
+  });
+
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const q = e.target.value.toLowerCase().trim();
+      const match = sidebarLinks.find(a =>
+        a.textContent.toLowerCase().includes(q)
+      );
+      if (match) match.click();
+    }
+  });
+}
+
+/* ============================================================
+   BACK TO TOP
+   ============================================================ */
+const backTop = document.getElementById("backTop");
+window.addEventListener("scroll", () => {
+  backTop.classList.toggle("show", window.scrollY > 600);
+}, { passive: true });
+
+backTop.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+/* ============================================================
+   KEYBOARD NAVIGATION
+   ============================================================ */
+document.addEventListener("keydown", (e) => {
+  // Focus search on "/" or Ctrl/Cmd+K
+  if ((e.key === "/" && !isInputFocused()) ||
+      ((e.ctrlKey || e.metaKey) && e.key === "k")) {
+    e.preventDefault();
+    if (searchInput) searchInput.focus();
+  }
+  // Escape closes sidebar
+  if (e.key === "Escape") {
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("show");
+    if (searchInput) searchInput.blur();
+  }
+});
+
+function isInputFocused() {
+  const el = document.activeElement;
+  return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA");
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+console.log("dfre v5.0 docs loaded ✓");
+</script>
+
+</body>
+</html>
