@@ -1,1054 +1,413 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>DFRE v5.0 — Complete Documentation</title>
-<meta name="description" content="Complete documentation for the Data Failure Risk Equation library v5.0 — intelligent + autonomous pipeline risk governance." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-
-<style>
-/* ============================================================
-   RESET & TOKENS
-   ============================================================ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #06080f;
-  --bg-2: #0b1020;
-  --surface: #0e1525;
-  --surface-2: #131c30;
-  --line: #1e2a42;
-  --line-2: #2c3c5a;
-
-  --text: #f4f7fc;
-  --text-2: #b9c4d8;
-  --muted: #7d8aa3;
-
-  --accent: #38bdf8;
-  --accent-2: #8b5cf6;
-  --accent-3: #22d3ee;
-  --ok: #34d399;
-  --warn: #fbbf24;
-  --danger: #fb7185;
-  --pink: #f472b6;
-
-  --radius: 14px;
-  --radius-sm: 10px;
-  --radius-lg: 20px;
-
-  --shadow: 0 20px 60px rgba(0,0,0,.4);
-  --shadow-sm: 0 8px 24px rgba(0,0,0,.25);
-
-  --sidebar-w: 290px;
-  --topbar-h: 64px;
-  --max-content: 920px;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 15.5px;
-  line-height: 1.7;
-  color: var(--text);
-  background:
-    radial-gradient(1200px 700px at 15% -8%, rgba(56,189,248,.08), transparent 60%),
-    radial-gradient(900px 500px at 90% 5%, rgba(139,92,246,.08), transparent 60%),
-    var(--bg);
-  background-attachment: fixed;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-::selection { background: rgba(56,189,248,.28); color: #fff; }
-
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-code {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: .85em;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #22304a; border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: #2f4260; }
-
-/* ============================================================
-   TOP BAR
-   ============================================================ */
-.topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--topbar-h);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 0 22px;
-  background: rgba(6,8,15,.82);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--line);
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 1.05rem;
-  letter-spacing: -.01em;
-  white-space: nowrap;
-}
-
-.logo-mark {
-  display: grid;
-  place-items: center;
-  width: 32px; height: 32px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #06121f;
-  font-weight: 900;
-  font-size: .92rem;
-  box-shadow: 0 4px 14px rgba(56,189,248,.3);
-}
-
-.version-pill {
-  padding: 2px 9px;
-  border-radius: 999px;
-  border: 1px solid rgba(52,211,153,.3);
-  background: rgba(52,211,153,.1);
-  color: #a7f3d0;
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .02em;
-}
-
-.topbar-actions {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-box svg {
-  position: absolute;
-  left: 12px;
-  width: 15px; height: 15px;
-  color: var(--muted);
-  pointer-events: none;
-}
-
-.search-box input {
-  width: 260px;
-  padding: 8px 12px 8px 36px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--text);
-  font-family: inherit;
-  font-size: .86rem;
-  outline: none;
-  transition: border-color .15s ease, background .15s ease;
-}
-
-.search-box input:focus {
-  border-color: var(--accent);
-  background: var(--bg-2);
-}
-
-.menu-toggle {
-  display: none;
-  width: 38px; height: 38px;
-  border-radius: 9px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--text-2);
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ============================================================
-   LAYOUT
-   ============================================================ */
-.layout {
-  display: grid;
-  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
-  max-width: 1600px;
-  margin: 0 auto;
-  padding-top: var(--topbar-h);
-}
-
-/* ============================================================
-   SIDEBAR
-   ============================================================ */
-.sidebar {
-  position: sticky;
-  top: var(--topbar-h);
-  height: calc(100vh - var(--topbar-h));
-  overflow-y: auto;
-  padding: 24px 12px 40px 22px;
-  border-right: 1px solid var(--line);
-}
-
-.sidebar-section {
-  margin-bottom: 22px;
-}
-
-.sidebar-title {
-  font-size: .68rem;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 0 10px;
-  margin-bottom: 8px;
-}
-
-.sidebar-list {
-  list-style: none;
-  display: grid;
-  gap: 1px;
-}
-
-.sidebar-list a {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 7px 11px;
-  border-radius: 8px;
-  color: var(--text-2);
-  font-size: .85rem;
-  font-weight: 500;
-  transition: background .12s ease, color .12s ease;
-  text-decoration: none;
-  border-left: 2px solid transparent;
-}
-
-.sidebar-list a:hover {
-  color: var(--text);
-  background: var(--surface);
-}
-
-.sidebar-list a.active {
-  color: var(--accent);
-  background: rgba(56,189,248,.08);
-  border-left-color: var(--accent);
-}
-
-.sidebar-list .badge {
-  margin-left: auto;
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-size: .62rem;
-  font-weight: 800;
-  letter-spacing: .04em;
-}
-
-.badge.v3 { background: rgba(139,92,246,.15); color: #c4b5fd; }
-.badge.v4 { background: rgba(244,114,182,.15); color: #fbcfe8; }
-.badge.new { background: rgba(52,211,153,.15); color: #a7f3d0; }
-
-/* ============================================================
-   MAIN CONTENT
-   ============================================================ */
-main {
-  min-width: 0;
-  padding: 40px clamp(20px, 5vw, 60px) 100px;
-  max-width: var(--max-content);
-}
-
-.hero {
-  margin-bottom: 48px;
-  padding-bottom: 32px;
-  border-bottom: 1px solid var(--line);
-}
-
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(56,189,248,.25);
-  background: rgba(56,189,248,.08);
-  color: #7dd3fc;
-  font-size: .7rem;
-  font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  margin-bottom: 18px;
-}
-
-.hero h1 {
-  font-size: clamp(1.9rem, 1.2rem + 2.6vw, 2.9rem);
-  font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -.028em;
-  margin-bottom: 14px;
-  background: linear-gradient(120deg, #ffffff 5%, #a5c8ff 55%, #b7a4fb 95%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.hero p {
-  font-size: 1.06rem;
-  color: var(--text-2);
-  max-width: 68ch;
-}
-
-.hero-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-top: 26px;
-}
-
-.stat {
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--accent);
-  letter-spacing: -.02em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.15;
-}
-
-.stat-label {
-  font-size: .74rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  font-weight: 700;
-  margin-top: 4px;
-}
-
-/* Sections */
-section {
-  scroll-margin-top: calc(var(--topbar-h) + 20px);
-  margin-bottom: 56px;
-}
-
-h2 {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: clamp(1.3rem, 1rem + .9vw, 1.7rem);
-  font-weight: 700;
-  letter-spacing: -.018em;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
-}
-
-h2 .h2-badge {
-  padding: 3px 9px;
-  border-radius: 6px;
-  font-size: .65rem;
-  font-weight: 800;
-  letter-spacing: .06em;
-}
-
-h3 {
-  font-size: 1.13rem;
-  font-weight: 700;
-  color: #9ec9ff;
-  margin: 26px 0 10px;
-}
-
-h4 {
-  font-size: .98rem;
-  font-weight: 700;
-  color: var(--text);
-  margin: 18px 0 8px;
-}
-
-p { margin: 12px 0; color: var(--text-2); }
-
-ul, ol {
-  margin: 12px 0;
-  padding-left: 22px;
-  color: var(--text-2);
-}
-
-li { margin: 6px 0; }
-
-strong { color: var(--text); font-weight: 600; }
-
-em { color: #c8b6fe; font-style: normal; }
-
-/* Feature cards */
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
-  margin: 20px 0;
-}
-
-.feature-card {
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  transition: border-color .15s ease, transform .15s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.feature-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  opacity: 0;
-  transition: opacity .15s ease;
-}
-
-.feature-card:hover {
-  border-color: var(--line-2);
-  transform: translateY(-2px);
-}
-
-.feature-card:hover::before { opacity: 1; }
-
-.feature-card h4 {
-  margin: 0 0 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: .96rem;
-}
-
-.feature-card p {
-  margin: 0;
-  font-size: .86rem;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.feature-icon {
-  display: grid;
-  place-items: center;
-  width: 26px; height: 26px;
-  border-radius: 7px;
-  background: rgba(56,189,248,.12);
-  color: var(--accent);
-  font-size: .82rem;
-  flex-shrink: 0;
-}
-
-/* Code blocks */
-.code-block {
-  position: relative;
-  margin: 16px 0;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: #05080f;
-  overflow: hidden;
-}
-
-.code-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface-2);
-  font-size: .72rem;
-  color: var(--muted);
-  font-weight: 600;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-
-.copy-btn {
-  padding: 4px 10px;
-  border: 1px solid var(--line-2);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-2);
-  font-family: inherit;
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all .15s ease;
-}
-
-.copy-btn:hover {
-  background: var(--surface);
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.copy-btn.copied {
-  color: var(--ok);
-  border-color: var(--ok);
-}
-
-.code-block pre {
-  margin: 0;
-  padding: 16px 18px;
-  overflow-x: auto;
-  font-family: "JetBrains Mono", monospace;
-  font-size: .79rem;
-  line-height: 1.65;
-  color: #dbe4f3;
-}
-
-.code-block pre code {
-  font-family: inherit;
-  font-size: inherit;
-}
-
-/* Inline code */
-.inline-code {
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  color: #7dd3fc;
-  font-family: "JetBrains Mono", monospace;
-  font-size: .83em;
-}
-
-/* Callouts */
-.callout {
-  padding: 14px 18px;
-  margin: 18px 0;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--accent);
-  background: var(--surface);
-  font-size: .89rem;
-  line-height: 1.7;
-  color: var(--text-2);
-}
-
-.callout.warning { border-left-color: var(--warn); }
-.callout.success { border-left-color: var(--ok); }
-.callout.danger { border-left-color: var(--danger); }
-.callout.info { border-left-color: var(--accent); }
-
-.callout strong { color: var(--text); }
-
-/* Tables */
-.table-wrap {
-  overflow-x: auto;
-  margin: 18px 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-}
-
-table {
-  width: 100%;
-  min-width: 540px;
-  border-collapse: collapse;
-  font-size: .85rem;
-}
-
-th, td {
-  padding: 11px 14px;
-  text-align: left;
-  border-bottom: 1px solid var(--line);
-  vertical-align: top;
-}
-
-th {
-  background: var(--surface-2);
-  color: var(--text);
-  font-weight: 700;
-  font-size: .74rem;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-td { color: var(--text-2); }
-
-tbody tr:hover td { background: rgba(56,189,248,.03); }
-tbody tr:last-child td { border-bottom: none; }
-
-.pill {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: .7rem;
-  font-weight: 700;
-  letter-spacing: .02em;
-}
-
-.pill.v3 { background: rgba(139,92,246,.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,.3); }
-.pill.v4 { background: rgba(244,114,182,.15); color: #fbcfe8; border: 1px solid rgba(244,114,182,.3); }
-.pill.ok { background: rgba(52,211,153,.15); color: #a7f3d0; border: 1px solid rgba(52,211,153,.3); }
-.pill.warn { background: rgba(251,191,36,.15); color: #fde68a; border: 1px solid rgba(251,191,36,.3); }
-.pill.no { background: rgba(125,138,163,.15); color: #a3aec4; border: 1px solid rgba(125,138,163,.3); }
-
-/* Tabs */
-.tabs {
-  display: flex;
-  gap: 4px;
-  margin: 18px 0 0;
-  border-bottom: 1px solid var(--line);
-  overflow-x: auto;
-}
-
-.tab {
-  padding: 9px 14px;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  font-family: inherit;
-  font-size: .86rem;
-  font-weight: 600;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  transition: color .15s ease, border-color .15s ease;
-  white-space: nowrap;
-}
-
-.tab:hover { color: var(--text-2); }
-
-.tab.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
-.tab-panel {
-  display: none;
-  margin-top: 18px;
-}
-
-.tab-panel.active { display: block; }
-
-/* Feature detail blocks */
-.feature-detail {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  padding: 22px;
-  margin: 20px 0;
-}
-
-.feature-detail-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.feature-detail-header h3 {
-  margin: 0;
-  font-size: 1.15rem;
-  color: var(--text);
-}
-
-.feature-num {
-  display: grid;
-  place-items: center;
-  width: 32px; height: 32px;
-  border-radius: 9px;
-  background: rgba(56,189,248,.12);
-  border: 1px solid rgba(56,189,248,.28);
-  color: var(--accent);
-  font-weight: 800;
-  font-size: .82rem;
-  flex-shrink: 0;
-}
-
-.feature-tag {
-  margin-left: auto;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: .68rem;
-  font-weight: 800;
-  letter-spacing: .04em;
-}
-
-/* Flow diagram */
-.flow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.flow-step {
-  padding: 14px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  text-align: center;
-  font-size: .82rem;
-  color: var(--text-2);
-}
-
-.flow-step .num {
-  display: grid;
-  place-items: center;
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  background: rgba(56,189,248,.15);
-  color: var(--accent);
-  font-weight: 800;
-  font-size: .72rem;
-  margin: 0 auto 8px;
-}
-
-.flow-step strong {
-  display: block;
-  font-size: .85rem;
-  color: var(--text);
-  margin-bottom: 2px;
-}
-
-/* Sidebar mobile toggle */
-.backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  z-index: 90;
-}
-
-.backdrop.show { display: block; }
-
-/* Footer */
-footer {
-  margin-top: 60px;
-  padding-top: 30px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: .84rem;
-  text-align: center;
-}
-
-footer p { color: var(--muted); margin: 5px 0; }
-
-/* Back-to-top */
-.back-top {
-  position: fixed;
-  right: 22px; bottom: 22px;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--line-2);
-  background: var(--surface);
-  color: var(--text-2);
-  cursor: pointer;
-  display: none;
-  place-items: center;
-  box-shadow: var(--shadow-sm);
-  transition: all .15s ease;
-  z-index: 50;
-}
-
-.back-top.show { display: grid; }
-
-.back-top:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  transform: translateY(-2px);
-}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 1024px) {
-  :root { --sidebar-w: 260px; }
-  main { padding: 32px 28px 80px; }
-}
-
-@media (max-width: 860px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar {
-    position: fixed;
-    top: var(--topbar-h);
-    left: 0; bottom: 0;
-    width: 280px;
-    background: var(--bg-2);
-    z-index: 95;
-    transform: translateX(-100%);
-    transition: transform .22s ease;
-    border-right: 1px solid var(--line);
-  }
-  .sidebar.open { transform: translateX(0); }
-  .menu-toggle { display: inline-flex; }
-  .search-box input { width: 180px; }
-}
-
-@media (max-width: 620px) {
-  .topbar { padding: 0 14px; gap: 10px; }
-  .logo span:not(.logo-mark) { font-size: .95rem; }
-  .search-box { display: none; }
-  main { padding: 24px 16px 60px; }
-  .hero h1 { font-size: 1.9rem; }
-  .hero p { font-size: .98rem; }
-  .hero-stats { grid-template-columns: 1fr 1fr; }
-  .feature-detail { padding: 16px; }
-  .feature-detail-header { flex-wrap: wrap; }
-  .feature-tag { margin-left: 0; }
-  th, td { padding: 9px 11px; font-size: .78rem; }
-  .code-block pre { padding: 13px 14px; font-size: .74rem; }
-  .callout { padding: 12px 14px; font-size: .85rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  * { transition: none !important; animation: none !important; }
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101512" />
+  <meta name="description" content="Interactive guide and risk calculator for DFRE 0.2.0, a composable data failure risk scoring library." />
+  <title>DFRE 0.2.0 | Risk workbench &amp; guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101512;
+      --bg-soft: #151d18;
+      --panel: #19231d;
+      --panel-hi: #202c25;
+      --line: #304037;
+      --line-soft: #26332b;
+      --text: #edf2eb;
+      --muted: #a4b2a8;
+      --quiet: #77877c;
+      --lime: #c9f17a;
+      --mint: #77d8bc;
+      --orange: #f5a16e;
+      --red: #fb7185;
+      --blue: #81c9ee;
+      --font: "Manrope", "Segoe UI", sans-serif;
+      --mono: "DM Mono", Consolas, monospace;
+      --top: 62px;
+      --side: 244px;
+      --content: 1180px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: calc(var(--top) + 20px); }
+    body {
+      margin: 0;
+      color: var(--text);
+      background-color: var(--bg);
+      background-image: linear-gradient(rgba(193, 226, 201, .025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(193, 226, 201, .025) 1px, transparent 1px);
+      background-size: 36px 36px;
+      font: 15px/1.65 var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, rgba(16, 21, 18, .12), var(--bg) 82%);
+      content: "";
+      pointer-events: none;
+    }
+    a { color: var(--lime); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: #e0ffae; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    code, pre { font-family: var(--mono); }
+    ::selection { color: #11170f; background: var(--lime); }
+    :focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+    [hidden] { display: none !important; }
+
+    .topbar {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      display: flex;
+      align-items: center;
+      min-height: var(--top);
+      gap: 14px;
+      padding: 0 26px;
+      border-bottom: 1px solid var(--line-soft);
+      background: rgba(16, 21, 18, .93);
+      backdrop-filter: blur(14px);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; }
+    .brand-mark {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 7px;
+      background: var(--lime);
+      color: #142014;
+      font: 800 12px/1 var(--mono);
+      letter-spacing: 0;
+    }
+    .brand-name { font-size: .94rem; font-weight: 800; letter-spacing: 0; }
+    .version { padding: 3px 8px; border: 1px solid #506448; border-radius: 4px; color: var(--lime); font: 500 .68rem/1.2 var(--mono); }
+    .topbar-meta { margin-left: 12px; color: var(--quiet); font-size: .78rem; }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+    .search-wrap { position: relative; }
+    .search-wrap svg { position: absolute; top: 50%; left: 11px; width: 15px; height: 15px; color: var(--quiet); transform: translateY(-50%); pointer-events: none; }
+    .search { width: 230px; height: 36px; padding: 0 38px 0 34px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg-soft); color: var(--text); font-size: .79rem; }
+    .key-hint { position: absolute; top: 8px; right: 9px; color: var(--quiet); font: .64rem var(--mono); }
+    .menu-toggle { display: none; width: 36px; height: 36px; padding: 8px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg-soft); cursor: pointer; }
+    .menu-toggle svg { display: block; width: 18px; height: 18px; }
+
+    .layout { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); max-width: 1640px; margin: 0 auto; }
+    .sidebar { position: sticky; top: var(--top); align-self: start; height: calc(100vh - var(--top)); overflow-y: auto; padding: 24px 14px 36px 20px; border-right: 1px solid var(--line-soft); }
+    .side-label { margin: 20px 10px 8px; color: var(--quiet); font: 500 .64rem var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .side-label:first-child { margin-top: 0; }
+    .side-list { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+    .side-list a { display: flex; align-items: center; min-height: 34px; padding: 6px 10px; border-left: 2px solid transparent; border-radius: 0 4px 4px 0; color: var(--muted); font-size: .78rem; text-decoration: none; transition: background .15s, color .15s; }
+    .side-list a:hover, .side-list a.active { border-left-color: var(--lime); background: rgba(201, 241, 122, .07); color: var(--lime); }
+    .side-list .nav-index { width: 27px; color: var(--quiet); font: .66rem var(--mono); }
+    .side-list a.active .nav-index { color: var(--lime); }
+    .side-foot { margin: 28px 10px 0; padding-top: 14px; border-top: 1px solid var(--line-soft); color: var(--quiet); font-size: .7rem; }
+
+    main { min-width: 0; width: 100%; max-width: calc(var(--content) + 96px); padding: 42px clamp(20px, 5vw, 64px) 90px; }
+    .hero { padding: 12px 0 32px; border-bottom: 1px solid var(--line); }
+    .eyebrow { display: flex; align-items: center; gap: 9px; margin-bottom: 17px; color: var(--lime); font: 500 .72rem var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px rgba(119, 216, 188, .6); }
+    h1 { max-width: 850px; margin: 0; font-size: clamp(2rem, 4.4vw, 4.15rem); font-weight: 800; line-height: 1.04; letter-spacing: 0; }
+    h1 span { color: var(--lime); }
+    .hero-copy { max-width: 680px; margin: 18px 0 0; color: var(--muted); font-size: 1rem; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 20px; color: var(--quiet); font: .7rem var(--mono); }
+    .hero-meta span::before { margin-right: 8px; color: var(--lime); content: "/"; }
+    .section { padding-top: 60px; scroll-margin-top: calc(var(--top) + 18px); }
+    .section-heading { display: flex; align-items: baseline; gap: 13px; margin: 0 0 8px; font-size: 1.55rem; font-weight: 800; line-height: 1.3; letter-spacing: 0; }
+    .section-index { color: var(--lime); font: .73rem var(--mono); }
+    .section-intro { max-width: 760px; margin: 0 0 22px; color: var(--muted); font-size: .9rem; }
+    h3 { margin: 30px 0 10px; font-size: 1.05rem; font-weight: 800; letter-spacing: 0; }
+    h4 { margin: 0 0 4px; font-size: .84rem; font-weight: 800; }
+    p { color: var(--muted); }
+    .callout { margin: 17px 0; padding: 13px 15px; border-left: 2px solid var(--lime); background: rgba(201, 241, 122, .055); color: var(--muted); font-size: .79rem; }
+    .callout strong { color: var(--text); }
+    .callout.warn { border-color: var(--orange); background: rgba(245, 161, 110, .06); }
+    .equation-box { margin: 17px 0; padding: 17px 18px; overflow-x: auto; border: 1px solid var(--line); border-radius: 5px; background: var(--bg-soft); color: var(--lime); font: .79rem/1.9 var(--mono); white-space: nowrap; }
+    .equation-caption { display: block; margin-top: 4px; color: var(--quiet); font: .65rem/1.5 var(--font); white-space: normal; }
+    .definition-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; margin: 18px 0; }
+    .definition { display: grid; grid-template-columns: 36px 1fr; gap: 11px; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
+    .definition-code { color: var(--lime); font: .78rem var(--mono); }
+    .definition h3 { margin: 0 0 3px; font-size: .8rem; }
+    .definition p { margin: 0; font-size: .72rem; }
+
+    .tool-shell { margin-top: 30px; border: 1px solid var(--line); border-radius: 7px; background: rgba(21, 29, 24, .94); box-shadow: 0 24px 80px rgba(0, 0, 0, .22); }
+    .tool-head { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 15px 18px; border-bottom: 1px solid var(--line); }
+    .tool-title { margin-right: auto; font-size: .85rem; font-weight: 800; }
+    .tool-kicker { color: var(--quiet); font: .68rem var(--mono); }
+    .mode-switch { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); }
+    .mode-button { min-height: 29px; padding: 4px 10px; border: 0; border-radius: 3px; background: transparent; color: var(--muted); font-size: .7rem; font-weight: 700; cursor: pointer; }
+    .mode-button[aria-pressed="true"] { background: var(--lime); color: #162014; }
+    .tool-body { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(290px, .8fr); }
+    .control-column { padding: 20px 22px; }
+    .result-column { padding: 22px; border-left: 1px solid var(--line); background: rgba(10, 15, 12, .35); }
+    .control-topline { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: var(--quiet); font: .66rem var(--mono); text-transform: uppercase; }
+    .signal-list { display: grid; }
+    .signal-row { display: grid; grid-template-columns: minmax(125px, .72fr) minmax(130px, 1fr) 66px; align-items: center; gap: 12px; min-height: 67px; border-bottom: 1px solid var(--line-soft); }
+    .signal-name { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: .8rem; font-weight: 700; }
+    .signal-code { display: grid; width: 23px; height: 23px; place-items: center; border: 1px solid #53624d; border-radius: 4px; color: var(--lime); font: .66rem var(--mono); }
+    .signal-help { margin-top: 1px; color: var(--quiet); font-size: .65rem; font-weight: 400; }
+    .signal-label-wrap { display: block; }
+    .signal-range { width: 100%; height: 4px; margin: 0; accent-color: var(--lime); cursor: pointer; }
+    .signal-number { width: 62px; height: 34px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--text); text-align: right; font: .72rem var(--mono); }
+    .signal-weight { width: 54px; height: 29px; padding: 3px 5px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--blue); text-align: right; font: .68rem var(--mono); }
+    .signal-end { display: flex; justify-content: flex-end; align-items: center; gap: 6px; }
+    .weight-wrap { display: flex; align-items: center; gap: 4px; color: var(--quiet); font: .62rem var(--mono); }
+    .signal-row.extra { grid-template-columns: minmax(125px, .72fr) minmax(130px, 1fr) 66px 90px; }
+    .extra-list { margin-top: 7px; }
+    .settings-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 19px; }
+    .setting label { display: block; margin-bottom: 5px; color: var(--quiet); font: .65rem var(--mono); }
+    .setting input { width: 100%; height: 36px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--text); font: .76rem var(--mono); }
+    .presets { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 17px; }
+    .preset-label { margin-right: 4px; color: var(--quiet); font: .65rem var(--mono); }
+    .subtle-button, .text-button { min-height: 31px; padding: 5px 9px; border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--muted); font-size: .68rem; font-weight: 700; cursor: pointer; }
+    .subtle-button:hover, .text-button:hover { border-color: var(--lime); color: var(--lime); }
+    .result-top { display: flex; justify-content: space-between; align-items: center; color: var(--quiet); font: .66rem var(--mono); text-transform: uppercase; }
+    .result-main { display: flex; align-items: center; gap: 17px; margin: 17px 0 15px; }
+    .risk-ring { --progress: 0deg; --band-color: var(--mint); display: grid; width: 130px; height: 130px; flex: 0 0 130px; place-items: center; border-radius: 50%; background: conic-gradient(var(--band-color) 0deg var(--progress), #2a382f var(--progress) 360deg); }
+    .risk-ring-inner { display: grid; width: 106px; height: 106px; align-content: center; justify-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--bg-soft); }
+    .risk-number { font: 500 1.75rem/1.1 var(--mono); font-variant-numeric: tabular-nums; }
+    .risk-label { margin-top: 4px; color: var(--quiet); font: .57rem var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+    .band-stack { min-width: 0; }
+    .band-tag { display: inline-flex; min-height: 25px; align-items: center; padding: 3px 8px; border: 1px solid currentColor; border-radius: 4px; color: var(--mint); font: 500 .68rem var(--mono); letter-spacing: .06em; }
+    .action-text { margin: 8px 0 0; color: var(--text); font-size: .82rem; font-weight: 700; line-height: 1.45; }
+    .result-explainer { min-height: 40px; margin: 0 0 18px; color: var(--muted); font-size: .73rem; }
+    .breakdown-title { display: flex; justify-content: space-between; padding: 10px 0 7px; border-top: 1px solid var(--line); color: var(--quiet); font: .63rem var(--mono); text-transform: uppercase; }
+    .component-row { display: grid; grid-template-columns: 74px 1fr 50px; align-items: center; gap: 8px; min-height: 26px; color: var(--muted); font-size: .67rem; }
+    .component-track { height: 5px; overflow: hidden; border-radius: 3px; background: #29362e; }
+    .component-fill { width: 0; height: 100%; border-radius: inherit; background: var(--mint); transition: width .18s ease; }
+    .component-value { color: var(--text); text-align: right; font: .64rem var(--mono); }
+    .risk-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-top: 16px; }
+    .risk-controls label { display: block; margin-bottom: 4px; color: var(--quiet); font: .57rem var(--mono); }
+    .risk-controls input { width: 100%; height: 30px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--text); font: .65rem var(--mono); }
+    .export-row { display: flex; justify-content: space-between; gap: 8px; margin-top: 13px; }
+    .text-button { border: 0; padding-left: 0; }
+    .formula-note { padding: 11px 14px; border-top: 1px solid var(--line); color: var(--quiet); font-size: .68rem; }
+    .formula-note code { color: var(--mint); font-size: .94em; }
+
+    .code-block { margin: 15px 0; overflow: hidden; border: 1px solid var(--line); border-radius: 5px; background: #0c110e; }
+    .code-head { display: flex; justify-content: space-between; align-items: center; min-height: 34px; padding: 0 12px; border-bottom: 1px solid var(--line-soft); color: var(--quiet); font: .63rem var(--mono); text-transform: uppercase; }
+    .copy-button { min-height: 26px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 3px; background: transparent; color: var(--muted); font: .61rem var(--mono); cursor: pointer; }
+    .copy-button:hover, .copy-button.copied { border-color: var(--lime); color: var(--lime); }
+    pre { margin: 0; padding: 15px; overflow-x: auto; color: #d9e6dc; font-size: .7rem; line-height: 1.75; tab-size: 4; }
+    pre code { font-size: inherit; }
+    .inline-code { padding: 2px 5px; border: 1px solid var(--line-soft); border-radius: 3px; background: var(--panel); color: var(--mint); font: .88em var(--mono); }
+    .data-table-wrap { overflow-x: auto; margin: 17px 0; border: 1px solid var(--line); border-radius: 5px; }
+    table { width: 100%; min-width: 550px; border-collapse: collapse; font-size: .75rem; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: top; }
+    th { background: var(--panel); color: var(--quiet); font: 500 .62rem var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+    td { color: var(--muted); }
+    tbody tr:last-child td { border-bottom: 0; }
+    td:first-child { color: var(--text); font-weight: 700; }
+    .tabs { display: flex; gap: 5px; margin: 18px 0 0; border-bottom: 1px solid var(--line); }
+    .tab { min-height: 37px; padding: 7px 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--quiet); font-size: .74rem; font-weight: 700; cursor: pointer; }
+    .tab[aria-selected="true"] { border-bottom-color: var(--lime); color: var(--lime); }
+    .tab-panel { padding-top: 8px; }
+    .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    .mini-heading { margin: 18px 0 5px; color: var(--text); font-size: .82rem; font-weight: 800; }
+    .plain-list { margin: 10px 0; padding-left: 18px; color: var(--muted); font-size: .8rem; }
+    .plain-list li { margin: 5px 0; }
+    .link-list { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 16px 0; font-size: .78rem; }
+    footer { display: flex; justify-content: space-between; gap: 18px; margin-top: 70px; padding-top: 17px; border-top: 1px solid var(--line); color: var(--quiet); font-size: .7rem; }
+    .toast { position: fixed; right: 18px; bottom: 18px; z-index: 50; padding: 9px 13px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel-hi); color: var(--text); font-size: .72rem; opacity: 0; transform: translateY(8px); transition: opacity .16s, transform .16s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .back-top { position: fixed; right: 18px; bottom: 62px; z-index: 18; display: none; width: 38px; height: 38px; place-items: center; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); color: var(--lime); cursor: pointer; }
+    .back-top.show { display: grid; }
+    .backdrop { display: none; position: fixed; inset: var(--top) 0 0; z-index: 15; background: rgba(0, 0, 0, .58); }
+    .backdrop.show { display: block; }
+
+    @media (max-width: 1040px) {
+      :root { --side: 216px; }
+      main { padding-right: 30px; padding-left: 30px; }
+      .tool-body { grid-template-columns: minmax(0, 1fr) 310px; }
+      .control-column, .result-column { padding: 17px; }
+    }
+    @media (max-width: 820px) {
+      .layout { display: block; }
+      .sidebar { position: fixed; z-index: 16; top: var(--top); bottom: 0; left: 0; width: min(290px, 84vw); height: auto; background: var(--bg); transform: translateX(-102%); transition: transform .2s ease; }
+      .sidebar.open { transform: translateX(0); }
+      .menu-toggle { display: grid; place-items: center; }
+      main { max-width: 100%; margin: 0 auto; }
+      .tool-body { grid-template-columns: 1fr; }
+      .result-column { border-top: 1px solid var(--line); border-left: 0; }
+      .result-column { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .9fr); column-gap: 20px; }
+      .result-top, .result-main, .result-explainer, .risk-controls, .export-row { grid-column: 1; }
+      .breakdown-title, .component-list { grid-column: 2; }
+      .breakdown-title { grid-row: 1; align-self: end; }
+      .component-list { grid-row: 2 / span 4; }
+      .risk-controls { margin-top: 4px; }
+    }
+    @media (max-width: 600px) {
+      :root { --top: 56px; }
+      .topbar { gap: 9px; padding: 0 12px; }
+      .topbar-meta { display: none; }
+      .search { width: min(42vw, 190px); }
+      .key-hint { display: none; }
+      main { padding: 26px 16px 65px; }
+      .hero { padding-top: 7px; }
+      h1 { font-size: 2.2rem; }
+      .hero-copy { font-size: .88rem; }
+      .section { padding-top: 43px; }
+      .section-heading { font-size: 1.28rem; }
+      .tool-head { padding: 12px; }
+      .tool-kicker { display: none; }
+      .control-column, .result-column { padding: 14px 12px; }
+      .signal-row { grid-template-columns: minmax(95px, .72fr) minmax(85px, 1fr) 58px; gap: 8px; min-height: 66px; }
+      .signal-row.extra { grid-template-columns: minmax(95px, .72fr) minmax(80px, 1fr) 58px; }
+      .signal-row.extra .weight-wrap { grid-column: 2 / 4; justify-self: end; margin-top: -7px; }
+      .signal-row.extra { padding: 6px 0; }
+      .signal-name { gap: 6px; font-size: .72rem; }
+      .signal-help { font-size: .58rem; }
+      .signal-code { width: 20px; height: 20px; font-size: .59rem; }
+      .signal-number { width: 56px; height: 32px; font-size: .67rem; }
+      .settings-grid { gap: 7px; }
+      .setting input { padding: 5px; font-size: .68rem; }
+      .result-column { display: block; }
+      .result-main { margin: 14px 0; }
+      .risk-ring { width: 112px; height: 112px; flex-basis: 112px; }
+      .risk-ring-inner { width: 90px; height: 90px; }
+      .risk-number { font-size: 1.45rem; }
+      .definition-list, .two-col { grid-template-columns: 1fr; }
+      .definition-list { gap: 0; }
+      footer { display: block; }
+      footer span { display: block; margin: 4px 0; }
+      pre { font-size: .64rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
-
 <body>
-
-<!-- ============================================================
-     TOP BAR
-     ============================================================ -->
-<header class="topbar">
-  <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-    </svg>
-  </button>
-
-  <div class="logo">
-    <div class="logo-mark">𝓡</div>
-    <span>dfre</span>
-    <span class="version-pill">v5.0</span>
-  </div>
-
-  <div class="topbar-actions">
-    <div class="search-box">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-        <circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/>
-      </svg>
-      <input type="text" id="searchInput" placeholder="Search features…" />
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+    </button>
+    <a class="brand" href="#top" aria-label="DFRE documentation home"><span class="brand-mark">R</span><span class="brand-name">dfre</span><span class="version">0.2.0</span></a>
+    <span class="topbar-meta">DATA FAILURE RISK EQUATION</span>
+    <div class="topbar-actions">
+      <label class="search-wrap" aria-label="Search this guide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input class="search" id="searchInput" type="search" placeholder="Find a section" autocomplete="off" />
+        <span class="key-hint">/</span>
+      </label>
     </div>
-  </div>
-</header>
+  </header>
+  <div class="backdrop" id="backdrop"></div>
 
-<div class="backdrop" id="backdrop"></div>
-
-<!-- ============================================================
-     LAYOUT
-     ============================================================ -->
-<div class="layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-title">Getting Started</div>
-      <ul class="sidebar-list">
-        <li><a href="#overview" class="active">Overview</a></li>
-        <li><a href="#install">Installation</a></li>
-        <li><a href="#quickstart">Quick Start</a></li>
-        <li><a href="#architecture">Architecture</a></li>
+  <div class="layout" id="top">
+    <aside class="sidebar" id="sidebar" aria-label="Documentation navigation">
+      <p class="side-label">Start here</p>
+      <ul class="side-list">
+        <li><a class="active" href="#overview"><span class="nav-index">01</span>Overview</a></li>
+        <li><a href="#workbench"><span class="nav-index">02</span>Risk workbench</a></li>
+        <li><a href="#install"><span class="nav-index">03</span>Installation</a></li>
+        <li><a href="#quickstart"><span class="nav-index">04</span>Quick start</a></li>
       </ul>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-title">v3 — Intelligent</div>
-      <ul class="sidebar-list">
-        <li><a href="#f-learned">Learned Coefficients <span class="badge v3">v3</span></a></li>
-        <li><a href="#f-bayesian">Bayesian Uncertainty <span class="badge v3">v3</span></a></li>
-        <li><a href="#f-causal">Causal DFRE <span class="badge v3">v3</span></a></li>
-        <li><a href="#f-temporal">Temporal DFRE <span class="badge v3">v3</span></a></li>
-        <li><a href="#f-multimodal">Multi-modal Signals <span class="badge v3">v3</span></a></li>
-        <li><a href="#f-autocal">Auto-Calibration <span class="badge v3">v3</span></a></li>
-        <li><a href="#f-explain">Explainability <span class="badge v3">v3</span></a></li>
-        <li><a href="#f-fused">Fused Uncertainty <span class="badge v3">v3</span></a></li>
-        <li><a href="#f-registry">Model Registry <span class="badge v3">v3</span></a></li>
-        <li><a href="#f-vectorstore">Vector Store <span class="badge v3">v3</span></a></li>
+      <p class="side-label">Use the library</p>
+      <ul class="side-list">
+        <li><a href="#signals"><span class="nav-index">05</span>Signals</a></li>
+        <li><a href="#pipeline"><span class="nav-index">06</span>Builder pipeline</a></li>
+        <li><a href="#calibration"><span class="nav-index">07</span>Calibration</a></li>
+        <li><a href="#explain"><span class="nav-index">08</span>Explain &amp; sensitivity</a></li>
+        <li><a href="#policy"><span class="nav-index">09</span>Policies</a></li>
+        <li><a href="#monitoring"><span class="nav-index">10</span>Monitoring</a></li>
       </ul>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="sidebar-title">v4 — Autonomous</div>
-      <ul class="sidebar-list">
-        <li><a href="#f-agent">Agentic DFRE <span class="badge v4">v4</span></a></li>
-        <li><a href="#f-federated">Federated DFRE <span class="badge v4">v4</span></a></li>
-        <li><a href="#f-simulator">Pipeline Simulator <span class="badge v4">v4</span></a></li>
-        <li><a href="#f-orchestrator">Orchestrator Guard <span class="badge v4">v4</span></a></li>
-        <li><a href="#f-streaming">Streaming DFRE <span class="badge v4">v4</span></a></li>
-        <li><a href="#f-crosscausal">Cross-Pipeline Causal <span class="badge v4">v4</span></a></li>
-        <li><a href="#f-rl">RL Thresholds <span class="badge v4">v4</span></a></li>
-        <li><a href="#f-twin">Digital Twin <span class="badge v4">v4</span></a></li>
-        <li><a href="#f-nl">Natural Language <span class="badge v4">v4</span></a></li>
-        <li><a href="#f-zk">Zero-Knowledge <span class="badge v4">v4</span></a></li>
+      <p class="side-label">Reference</p>
+      <ul class="side-list">
+        <li><a href="#integrations"><span class="nav-index">11</span>Integrations</a></li>
+        <li><a href="#cli"><span class="nav-index">12</span>Command line</a></li>
+        <li><a href="#limits"><span class="nav-index">13</span>Interpretation</a></li>
       </ul>
-    </div>
+      <div class="side-foot">Python 3.9+<br />Core dependency: NumPy</div>
+    </aside>
 
-    <div class="sidebar-section">
-      <div class="sidebar-title">Reference</div>
-      <ul class="sidebar-list">
-        <li><a href="#integrations">Integrations</a></li>
-        <li><a href="#matrix">Feature Matrix</a></li>
-        <li><a href="#api">API Cheatsheet</a></li>
-        <li><a href="#migration">Migration Guide</a></li>
-        <li><a href="#roadmap">Roadmap</a></li>
-      </ul>
-    </div>
-  </aside>
+    <main>
+      <section class="hero" id="overview">
+        <div class="eyebrow"><span class="status-dot"></span>Version 0.2.0 · interactive guide</div>
+        <h1>See the risk <span>between</span> your signals.</h1>
+        <p class="hero-copy">DFRE combines data quality, distribution drift, and model uncertainty into a bounded batch-risk score, then gives you the tools to explain, calibrate, and monitor it.</p>
+        <div class="hero-meta"><span>8 composable signals</span><span>Named-signal equation</span><span>Local, no account required</span></div>
+      </section>
 
-  <!-- MAIN -->
-  <main id="main">
-
-    <!-- HERO -->
-    <div class="hero">
-      <span class="hero-eyebrow">● Documentation · v5.0 · Unified Release</span>
-      <h1>Data Failure Risk Equation — Complete Reference</h1>
-      <p>
-        A bounded, nonlinear risk score for joint data/AI degradation.
-        <strong>v5.0</strong> unifies every feature from v3 (Intelligent) and v4 (Autonomous)
-        into one production-ready library.
-      </p>
-
-      <div class="hero-stats">
-        <div class="stat">
-          <div class="stat-value">20</div>
-          <div class="stat-label">Features</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">4</div>
-          <div class="stat-label">Signals</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">1</div>
-          <div class="stat-label">Formula</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">0.1.0→5.0</div>
-          <div class="stat-label">Versions</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- OVERVIEW -->
-    <section id="overview">
-      <h2>Overview</h2>
-      <p>
-        Data pipelines rarely fail for a single reason. Missing values, invalid records,
-        distribution drift, and model uncertainty combine into something worse than any
-        single signal suggests. <strong>DFRE</strong> quantifies that combined risk as a
-        bounded score 𝓡 ∈ [0, 1).
-      </p>
-
-      <div class="code-block">
-        <div class="code-header">
-          <span>core equation</span>
-          <button class="copy-btn" data-copy="eq">Copy</button>
-        </div>
-        <pre><code id="eq">𝓡 = 1 − exp( −[ M + V + D + U + λ(MV+VD+DU+UM) + γ·MVDU ] / (1 + √N) )</code></pre>
-      </div>
-
-      <div class="feature-grid">
-        <div class="feature-card">
-          <h4><span class="feature-icon">M</span> Missingness</h4>
-          <p>Fraction of missing expected values in the batch.</p>
-        </div>
-        <div class="feature-card">
-          <h4><span class="feature-icon">V</span> Invalidity</h4>
-          <p>Fraction of records failing validation rules.</p>
-        </div>
-        <div class="feature-card">
-          <h4><span class="feature-icon">D</span> Drift</h4>
-          <p>Normalized distribution shift vs. reference.</p>
-        </div>
-        <div class="feature-card">
-          <h4><span class="feature-icon">U</span> Uncertainty</h4>
-          <p>Normalized predictive uncertainty of the model.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- INSTALLATION -->
-    <section id="install">
-      <h2>Installation</h2>
-
-      <div class="tabs">
-        <button class="tab active" data-tab="pip">pip</button>
-        <button class="tab" data-tab="github">GitHub</button>
-        <button class="tab" data-tab="poetry">Poetry</button>
-      </div>
-
-      <div class="tab-panel active" data-panel="pip">
-        <div class="code-block">
-          <div class="code-header">
-            <span>bash</span>
-            <button class="copy-btn" data-copy="pip1">Copy</button>
+      <section class="section" id="workbench">
+        <h2 class="section-heading"><span class="section-index">02 /</span> Risk workbench</h2>
+        <p class="section-intro">Explore how signal levels and equation parameters affect a score. Values are normalized from 0 to 1; this calculator runs entirely in your browser and does not upload data.</p>
+        <div class="tool-shell" aria-label="Interactive DFRE score calculator">
+          <div class="tool-head">
+            <span class="tool-title">Batch score simulator</span><span class="tool-kicker">LIVE · LOCAL ONLY</span>
+            <div class="mode-switch" role="group" aria-label="Equation mode">
+              <button class="mode-button" type="button" data-mode="classic" aria-pressed="true">Core 4</button>
+              <button class="mode-button" type="button" data-mode="generalized" aria-pressed="false">All 8 signals</button>
+            </div>
           </div>
-          <pre><code id="pip1"># Core only
-pip install dfre
-
-# Everything (all v3 + v4 features)
-pip install "dfre[all]"</code></pre>
-        </div>
-      </div>
-
-      <div class="tab-panel" data-panel="github">
-        <div class="code-block">
-          <div class="code-header">
-            <span>bash</span>
-            <button class="copy-btn" data-copy="gh1">Copy</button>
+          <div class="tool-body">
+            <div class="control-column">
+              <div class="control-topline"><span>01</span><span>Signal inputs</span><span>percentage</span></div>
+              <div class="signal-list" id="coreSignals">
+                <div class="signal-row" data-signal-row="M"><label class="signal-label-wrap" for="M-range"><span class="signal-name"><span class="signal-code">M</span>Missingness</span><span class="signal-help">Missing expected values</span></label><input class="signal-range" id="M-range" data-range="M" type="range" min="0" max="100" value="8" aria-label="Missingness percent" /><div class="signal-end"><input class="signal-number" id="M-number" data-number="M" type="number" min="0" max="100" step="1" value="8" aria-label="Missingness percent" /><span class="tool-kicker">%</span></div></div>
+                <div class="signal-row" data-signal-row="V"><label class="signal-label-wrap" for="V-range"><span class="signal-name"><span class="signal-code">V</span>Invalidity</span><span class="signal-help">Rows failing validation rules</span></label><input class="signal-range" id="V-range" data-range="V" type="range" min="0" max="100" value="4" aria-label="Invalidity percent" /><div class="signal-end"><input class="signal-number" id="V-number" data-number="V" type="number" min="0" max="100" step="1" value="4" aria-label="Invalidity percent" /><span class="tool-kicker">%</span></div></div>
+                <div class="signal-row" data-signal-row="D"><label class="signal-label-wrap" for="D-range"><span class="signal-name"><span class="signal-code">D</span>Drift</span><span class="signal-help">Shift from a reference batch</span></label><input class="signal-range" id="D-range" data-range="D" type="range" min="0" max="100" value="12" aria-label="Drift percent" /><div class="signal-end"><input class="signal-number" id="D-number" data-number="D" type="number" min="0" max="100" step="1" value="12" aria-label="Drift percent" /><span class="tool-kicker">%</span></div></div>
+                <div class="signal-row" data-signal-row="U"><label class="signal-label-wrap" for="U-range"><span class="signal-name"><span class="signal-code">U</span>Uncertainty</span><span class="signal-help">Predictive uncertainty</span></label><input class="signal-range" id="U-range" data-range="U" type="range" min="0" max="100" value="20" aria-label="Uncertainty percent" /><div class="signal-end"><input class="signal-number" id="U-number" data-number="U" type="number" min="0" max="100" step="1" value="20" aria-label="Uncertainty percent" /><span class="tool-kicker">%</span></div></div>
+              </div>
+              <div class="extra-list" id="extraSignals" hidden>
+                <div class="signal-row extra" data-signal-row="freshness"><label class="signal-label-wrap" for="freshness-range"><span class="signal-name"><span class="signal-code">F</span>Freshness</span><span class="signal-help">Age relative to feed SLA</span></label><input class="signal-range" id="freshness-range" data-range="freshness" type="range" min="0" max="100" value="30" aria-label="Freshness risk percent" /><div class="signal-end"><input class="signal-number" id="freshness-number" data-number="freshness" type="number" min="0" max="100" step="1" value="30" aria-label="Freshness risk percent" /><span class="tool-kicker">%</span></div><label class="weight-wrap" for="freshness-weight">w <input class="signal-weight" id="freshness-weight" data-weight="freshness" type="number" min="0" max="10" step="0.1" value="0.8" /></label></div>
+                <div class="signal-row extra" data-signal-row="volume"><label class="signal-label-wrap" for="volume-range"><span class="signal-name"><span class="signal-code">L</span>Volume</span><span class="signal-help">Unexpected batch size</span></label><input class="signal-range" id="volume-range" data-range="volume" type="range" min="0" max="100" value="15" aria-label="Volume risk percent" /><div class="signal-end"><input class="signal-number" id="volume-number" data-number="volume" type="number" min="0" max="100" step="1" value="15" aria-label="Volume risk percent" /><span class="tool-kicker">%</span></div><label class="weight-wrap" for="volume-weight">w <input class="signal-weight" id="volume-weight" data-weight="volume" type="number" min="0" max="10" step="0.1" value="0.5" /></label></div>
+                <div class="signal-row extra" data-signal-row="schema"><label class="signal-label-wrap" for="schema-range"><span class="signal-name"><span class="signal-code">S</span>Schema</span><span class="signal-help">Contract violations</span></label><input class="signal-range" id="schema-range" data-range="schema" type="range" min="0" max="100" value="0" aria-label="Schema risk percent" /><div class="signal-end"><input class="signal-number" id="schema-number" data-number="schema" type="number" min="0" max="100" step="1" value="0" aria-label="Schema risk percent" /><span class="tool-kicker">%</span></div><label class="weight-wrap" for="schema-weight">w <input class="signal-weight" id="schema-weight" data-weight="schema" type="number" min="0" max="10" step="0.1" value="1" /></label></div>
+                <div class="signal-row extra" data-signal-row="outliers"><label class="signal-label-wrap" for="outliers-range"><span class="signal-name"><span class="signal-code">O</span>Outliers</span><span class="signal-help">Rows flagged as extreme</span></label><input class="signal-range" id="outliers-range" data-range="outliers" type="range" min="0" max="100" value="3" aria-label="Outlier risk percent" /><div class="signal-end"><input class="signal-number" id="outliers-number" data-number="outliers" type="number" min="0" max="100" step="1" value="3" aria-label="Outlier risk percent" /><span class="tool-kicker">%</span></div><label class="weight-wrap" for="outliers-weight">w <input class="signal-weight" id="outliers-weight" data-weight="outliers" type="number" min="0" max="10" step="0.1" value="0.5" /></label></div>
+              </div>
+              <div class="settings-grid" aria-label="Equation parameters">
+                <div class="setting"><label for="sampleSize">BATCH SIZE · N</label><input id="sampleSize" type="number" min="1" step="1" value="1000" /></div>
+                <div class="setting"><label for="lambda">PAIRWISE · λ</label><input id="lambda" type="number" min="0" step="0.1" value="1" /></div>
+                <div class="setting"><label for="gamma">HIGHER ORDER · γ</label><input id="gamma" type="number" min="0" step="0.1" value="1" /></div>
+              </div>
+              <div class="presets" aria-label="Example signal presets"><span class="preset-label">LOAD EXAMPLE</span><button class="subtle-button" type="button" data-preset="routine">Routine</button><button class="subtle-button" type="button" data-preset="watch">Watch</button><button class="subtle-button" type="button" data-preset="incident">Incident</button><button class="text-button" type="button" id="resetInputs">Reset</button></div>
+            </div>
+            <div class="result-column" aria-live="polite" aria-atomic="false">
+              <div class="result-top"><span>Calculated risk</span><span id="modeLabel">CORE EQUATION</span></div>
+              <div class="result-main"><div class="risk-ring" id="riskRing" role="img" aria-label="Risk score gauge"><div class="risk-ring-inner"><span class="risk-number" id="riskValue">0.000</span><span class="risk-label">risk score</span></div></div><div class="band-stack"><span class="band-tag" id="bandTag">LOW</span><p class="action-text" id="actionText">Continue normal monitoring</p></div></div>
+              <p class="result-explainer" id="resultExplainer">The score combines signal levels, interaction terms, and batch-size normalization.</p>
+              <div class="breakdown-title"><span>Equation components</span><span>intensity</span></div>
+              <div class="component-list">
+                <div class="component-row"><span>Main effects</span><span class="component-track"><span class="component-fill" id="mainFill"></span></span><span class="component-value" id="mainValue">0.000</span></div>
+                <div class="component-row"><span>Pairwise</span><span class="component-track"><span class="component-fill" id="pairFill"></span></span><span class="component-value" id="pairValue">0.000</span></div>
+                <div class="component-row"><span>Higher-order</span><span class="component-track"><span class="component-fill" id="higherFill"></span></span><span class="component-value" id="higherValue">0.000</span></div>
+                <div class="component-row"><span>Normalized</span><span class="component-track"><span class="component-fill" id="normalizedFill"></span></span><span class="component-value" id="normalizedValue">0.000</span></div>
+              </div>
+              <div class="risk-controls" aria-label="Policy thresholds"><div><label for="lowMax">LOW &lt;</label><input id="lowMax" type="number" min="0" max="1" step="0.01" value="0.20" /></div><div><label for="moderateMax">MODERATE &lt;</label><input id="moderateMax" type="number" min="0" max="1" step="0.01" value="0.45" /></div><div><label for="highMax">HIGH &lt;</label><input id="highMax" type="number" min="0" max="1" step="0.01" value="0.70" /></div></div>
+              <div class="export-row"><span class="tool-kicker">Thresholds are editable for exploration</span><button class="subtle-button" id="exportJson" type="button">Export inputs</button></div>
+            </div>
           </div>
-          <pre><code id="gh1">pip install git+https://github.com/YOUR_USERNAME/dfre.git@v5.0.0</code></pre>
+          <div class="formula-note">Risk = <code>1 - exp(-intensity)</code> · intensity = interaction-adjusted signals / <code>(1 + √N)</code>. Bands are policy labels, not probabilities.</div>
         </div>
-      </div>
+      </section>
 
-      <div class="tab-panel" data-panel="poetry">
-        <div class="code-block">
-          <div class="code-header">
-            <span>toml</span>
-            <button class="copy-btn" data-copy="py1">Copy</button>
-          </div>
-          <pre><code id="py1">[tool.poetry.dependencies]
-dfre = { version = "^5.0", extras = ["all"] }</code></pre>
-        </div>
-      </div>
+      <section class="section" id="install">
+        <h2 class="section-heading"><span class="section-index">03 /</span> Installation</h2>
+        <p class="section-intro">This repository is the source distribution. Install from its root folder; optional extras add integrations as needed.</p>
+        <div class="tabs" role="tablist" aria-label="Installation options"><button class="tab" id="tab-local" type="button" role="tab" aria-selected="true" aria-controls="panel-local">Local checkout</button><button class="tab" id="tab-pypi" type="button" role="tab" aria-selected="false" aria-controls="panel-pypi">Package index</button></div>
+        <div class="tab-panel" id="panel-local" role="tabpanel" aria-labelledby="tab-local"><div class="code-block"><div class="code-head"><span>PowerShell · repository root</span><button class="copy-button" data-copy="installLocal" type="button">Copy</button></div><pre><code id="installLocal">python -m pip install -e .
+# DataFrame workflows and scipy drift statistics:
+python -m pip install -e ".[pandas,scipy]"
+# All declared optional integrations:
+python -m pip install -e ".[all]"</code></pre></div></div>
+        <div class="tab-panel" id="panel-pypi" role="tabpanel" aria-labelledby="tab-pypi" hidden><div class="code-block"><div class="code-head"><span>PowerShell</span><button class="copy-button" data-copy="installPypi" type="button">Copy</button></div><pre><code id="installPypi">python -m pip install dfre
+python -m pip install "dfre[pandas,scipy]"</code></pre></div><p class="callout warn"><strong>Package availability depends on your configured index.</strong> If pip reports that no dfre distribution exists, install the local checkout above.</p></div>
+        <div class="data-table-wrap"><table><thead><tr><th>Extra</th><th>Adds</th></tr></thead><tbody>
+          <tr><td>pandas</td><td>DataFrame accessor and calibration input support</td></tr><tr><td>scipy</td><td>KS and Wasserstein drift statistics</td></tr><tr><td>calibration</td><td>scikit-learn transformer support</td></tr><tr><td>airflow</td><td>Apache Airflow operator</td></tr><tr><td>prometheus</td><td>Prometheus metrics client</td></tr><tr><td>serve</td><td>FastAPI and Uvicorn scoring service</td></tr><tr><td>all</td><td>All optional runtime integrations above</td></tr>
+        </tbody></table></div>
+      </section>
 
-      <div class="callout info">
-        <strong>Python 3.9+</strong> required. Core has zero dependencies beyond NumPy.
-        Extras like <span class="inline-code">pandas</span>, <span class="inline-code">torch</span>, and
-        <span class="inline-code">scikit-learn</span> are opt-in.
-      </div>
-    </section>
+      <section class="section" id="quickstart">
+        <h2 class="section-heading"><span class="section-index">04 /</span> Quick start</h2>
+        <p class="section-intro">The one-liner accepts four precomputed signals. Each signal is a value from zero to one; zero means no observed issue and one means maximal issue for that signal.</p>
+        <div class="code-block"><div class="code-head"><span>Python · core only</span><button class="copy-button" data-copy="quickCode" type="button">Copy</button></div><pre><code id="quickCode">import dfre
 
-    <!-- QUICKSTART -->
-    <section id="quickstart">
-      <h2>Quick Start</h2>
-      <p>Add DFRE risk scoring to any pipeline in a single line.</p>
-
-      <div class="code-block">
-        <div class="code-header">
-          <span>python</span>
-          <button class="copy-btn" data-copy="qs1">Copy</button>
-        </div>
-        <pre><code id="qs1">import dfre
-
-# One line — that's it
 result = dfre.score(
     missing=0.08,
     invalid=0.04,
@@ -1057,1144 +416,395 @@ result = dfre.score(
     n=1000,
 )
 
-print(result.risk)      # 0.0914
-print(result.band)      # LOW
-print(result.action)    # continue_normal_monitoring</code></pre>
-      </div>
+print(result.risk, result.band, result.action)</code></pre></div>
+        <p class="callout"><strong>Use the library score in production.</strong> This page’s workbench is a browser-side learning aid; it does not inspect a dataset or call the Python package.</p>
+      </section>
 
-      <h3>Pandas Accessor</h3>
-      <div class="code-block">
-        <div class="code-header">
-          <span>python</span>
-          <button class="copy-btn" data-copy="qs2">Copy</button>
-        </div>
-        <pre><code id="qs2">import dfre.integrations.pandas_ext  # registers df.dfre
+      <section class="section" id="signals">
+        <h2 class="section-heading"><span class="section-index">05 /</span> Signals</h2>
+        <p class="section-intro">Core signals can be supplied directly or computed from batches with signal classes. In v0.2.0, four optional signals extend scoring to freshness, batch volume, schema, and outliers.</p>
+        <div class="data-table-wrap"><table><thead><tr><th>Signal</th><th>What it measures</th><th>Useful details</th></tr></thead><tbody>
+          <tr><td>M · Missingness</td><td>Fraction of missing values, with configurable sentinel handling.</td><td><code>MissingnessSignal(sentinels=None)</code></td></tr><tr><td>V · Invalidity</td><td>Fraction of rows failing per-column boolean validation rules.</td><td><code>InvaliditySignal(rules)</code>; inspect failing columns.</td></tr><tr><td>D · Drift</td><td>Distribution change from a reference batch across numeric or categorical fields.</td><td>PSI by default; KS and Wasserstein require SciPy.</td></tr><tr><td>U · Uncertainty</td><td>Predictive uncertainty from probability outputs or MC-dropout samples.</td><td>Entropy, margin, or MC-dropout methods.</td></tr><tr><td>Freshness</td><td>Age of the latest data relative to an SLA; capped at 1.</td><td><code>FreshnessSignal(sla_seconds)</code></td></tr><tr><td>Volume</td><td>Log-ratio anomaly between observed and expected row counts.</td><td><code>VolumeSignal(expected_rows)</code></td></tr><tr><td>Schema</td><td>Missing/extra columns and optional dtype contract failures.</td><td><code>SchemaSignal(expected_columns)</code></td></tr><tr><td>Outliers</td><td>Fraction of rows extreme in any watched numeric column.</td><td>IQR or z-score method.</td></tr>
+        </tbody></table></div>
+        <p class="callout warn"><strong>Normalize deliberately.</strong> DFRE combines signal values as comparable [0, 1] indicators. The value’s meaning depends on each signal’s definition and chosen scale.</p>
+      </section>
 
-result = incoming_df.dfre.score(
-    reference=reference_df,
-    rules={"age": lambda s: s.between(0, 120)},
-    continuous_cols=["age", "bmi"],
-    probabilities=predictions,
-)</code></pre>
-      </div>
-    </section>
+      <section class="section" id="pipeline">
+        <h2 class="section-heading"><span class="section-index">06 /</span> Builder pipeline</h2>
+        <p class="section-intro">Use the builder when you want DFRE to compute signals from each incoming batch, compare against reference data, and attach context to extra signals.</p>
+        <div class="code-block"><div class="code-head"><span>Python · pandas extra</span><button class="copy-button" data-copy="builderCode" type="button">Copy</button></div><pre><code id="builderCode">import numpy as np
+from dfre import DFREBuilder, DriftSignal, InvaliditySignal
+from dfre import FreshnessSignal, MissingnessSignal, OutlierSignal
+from dfre import SchemaSignal, UncertaintySignal, VolumeSignal
 
-    <!-- ARCHITECTURE -->
-    <section id="architecture">
-      <h2>Architecture</h2>
-
-      <div class="flow">
-        <div class="flow-step">
-          <div class="num">1</div>
-          <strong>Ingest</strong>
-          <span>Raw batch from DB/S3/Kafka</span>
-        </div>
-        <div class="flow-step">
-          <div class="num">2</div>
-          <strong>Validate</strong>
-          <span>Schema + rules + nulls</span>
-        </div>
-        <div class="flow-step">
-          <div class="num">3</div>
-          <strong>Signals</strong>
-          <span>M, V, D, U computed</span>
-        </div>
-        <div class="flow-step">
-          <div class="num">4</div>
-          <strong>DFRE</strong>
-          <span>Risk + components</span>
-        </div>
-        <div class="flow-step">
-          <div class="num">5</div>
-          <strong>Policy</strong>
-          <span>Band + action</span>
-        </div>
-        <div class="flow-step">
-          <div class="num">6</div>
-          <strong>Act</strong>
-          <span>Alert / block / retrain</span>
-        </div>
-      </div>
-
-      <div class="callout success">
-        <strong>Design principle:</strong> DFRE is a monitoring layer, not a replacement.
-        Keep the raw M, V, D, U signals alongside the risk score so you can diagnose <em>why</em> risk rose.
-      </div>
-    </section>
-
-    <!-- ============================================================
-         v3 FEATURES
-         ============================================================ -->
-
-    <section id="f-learned">
-      <h2>Learned Coefficients <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.1</div>
-          <h3>Input-dependent λ and γ</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <p>
-          Instead of fixed scalar λ and γ, learn them as neural functions
-          <em>λ(M,V,D,U)</em> and <em>γ(M,V,D,U)</em> from historical batches. This makes the
-          interaction strength context-aware — a 5% drift may be critical in a sensitive pipeline
-          but negligible in a stable one.
-        </p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f1">Copy</button>
-          </div>
-          <pre><code id="f1">from dfre.learned import train_learned_dfre, LearnedDFREModel
-
-# Train on historical batches
-model = train_learned_dfre(history_df, epochs=200, lr=1e-3)
-wrapper = LearnedDFREModel(model)
-
-# Score with learned coefficients
-result = wrapper.score(M=0.30, V=0.20, D=0.40, U=0.35, n=5000)
-print(result.risk, result.learned_lam, result.learned_gamma)
-
-# Save / load
-wrapper.save("dfre_learned_v5.pt")
-wrapper = LearnedDFREModel.load("dfre_learned_v5.pt")</code></pre>
-        </div>
-
-        <h4>Why it matters</h4>
-        <ul>
-          <li><strong>Context-aware:</strong> Different pipelines get different interaction strengths.</li>
-          <li><strong>Data-driven:</strong> λ, γ become learned parameters, not hyperparameters.</li>
-          <li><strong>Backward compatible:</strong> Falls back to static λ=1, γ=1 when no model loaded.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="f-bayesian">
-      <h2>Bayesian Uncertainty <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.2</div>
-          <h3>Credible intervals over 𝓡</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <p>
-          Propagate input distributions and parameter posteriors through the equation to get a full
-          posterior over 𝓡. Essential for regulated industries that require uncertainty quantification.
-        </p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f2">Copy</button>
-          </div>
-          <pre><code id="f2">from dfre.bayesian import BayesianDFRE
-
-bayes = BayesianDFRE(
-    lam_posterior=("normal", 1.0, 0.15),
-    gamma_posterior=("normal", 1.0, 0.25),
+rules = {"age": lambda s: s.between(0, 120)}
+pipeline = (
+    DFREBuilder()
+    .with_missingness(MissingnessSignal())
+    .with_invalidity(InvaliditySignal(rules))
+    .with_drift(DriftSignal(["age", "income"], statistic="psi"))
+    .with_uncertainty(UncertaintySignal(method="entropy"))
+    .with_extra_signal("freshness", FreshnessSignal(sla_seconds=3600), weight=0.8)
+    .with_extra_signal("volume", VolumeSignal(expected_rows=10_000), weight=0.5)
+    .with_extra_signal("schema", SchemaSignal(["age", "income"]), weight=1.0)
+    .with_extra_signal("outliers", OutlierSignal(["age", "income"]), weight=0.5)
+    .build()
 )
 
-posterior = bayes.score(
-    M_dist=("beta", 2, 20),
-    V_dist=("beta", 1, 30),
-    D_dist=("beta", 2, 15),
-    U_dist=("beta", 4, 10),
-    n=5000,
-    credible_level=0.95,
-)
-
-print(f"𝓡 = {posterior.mean:.3f} ± {posterior.std:.3f}")
-print(f"95% CI: [{posterior.ci_low:.3f}, {posterior.ci_high:.3f}]")</code></pre>
-        </div>
-
-        <h4>Supported distributions</h4>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Tuple</th><th>Distribution</th><th>Parameters</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><span class="inline-code">("normal", μ, σ)</span></td><td>Normal</td><td>mean, std</td></tr>
-              <tr><td><span class="inline-code">("uniform", a, b)</span></td><td>Uniform</td><td>low, high</td></tr>
-              <tr><td><span class="inline-code">("beta", α, β)</span></td><td>Beta</td><td>alpha, beta</td></tr>
-              <tr><td><span class="inline-code">("point", v)</span></td><td>Dirac</td><td>value</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-causal">
-      <h2>Causal DFRE <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.3</div>
-          <h3>Intervention ranking via do-calculus</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <p>
-          Answer <em>"what would happen if we fixed missingness?"</em> DFRE uses a causal DAG over
-          {"M", "V", "D", "U", "F"} and estimates the risk reduction from each single-variable
-          intervention.
-        </p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f3">Copy</button>
-          </div>
-          <pre><code id="f3">from dfre.causal import CausalDFRE
-
-causal = CausalDFRE().fit(history_df)
-
-effects = causal.rank_interventions({"M": 0.35, "V": 0.20, "D": 0.30, "U": 0.40})
-for e in effects:
-    print(f"Fix {list(e.intervention)[0]}: Δrisk = {e.expected_risk_reduction:.3f}")
-
-# Fix M: Δrisk = 0.243  ← largest impact
-# Fix D: Δrisk = 0.187
-# Fix U: Δrisk = 0.121
-# Fix V: Δrisk = 0.089</code></pre>
-        </div>
-
-        <div class="callout warning">
-          <strong>Note:</strong> Causal claims require a valid DAG. The default DAG is a
-          reasonable starting point, but you should validate edges against domain knowledge.
-        </div>
-      </div>
-    </section>
-
-    <section id="f-temporal">
-      <h2>Temporal DFRE <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.4</div>
-          <h3>Sequence-aware scoring with LSTM</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <p>
-          DFRE normally treats each batch independently. Real pipelines have temporal dependencies —
-          yesterday's drift predicts today's uncertainty. Temporal DFRE aggregates over a rolling window
-          using a bidirectional LSTM.
-        </p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f4">Copy</button>
-          </div>
-          <pre><code id="f4">from dfre.temporal import TemporalDFRE
-import torch
-
-model = TemporalDFRE(window=10, hidden=64, layers=2)
-
-# Feed the last 10 batches
-window = torch.tensor(last_10[["M","V","D","U"]].values).unsqueeze(0)
-current = torch.tensor([current_batch[["M","V","D","U"]].values])
-
-risk = model(window, current, n=len(current_batch))
-print(risk.item())</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-multimodal">
-      <h2>Multi-modal Signals <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.5</div>
-          <h3>Text, image, embedding signals</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <p>
-          Extend DFRE beyond tabular data. Extract M, V, D, U from text, images, and embedding spaces.
-        </p>
-
-        <div class="feature-grid">
-          <div class="feature-card">
-            <h4>TextMissingnessSignal</h4>
-            <p>Missing-token rate for NLP pipelines.</p>
-          </div>
-          <div class="feature-card">
-            <h4>ImageCorruptionSignal</h4>
-            <p>Blur/NaN detection via Laplacian variance.</p>
-          </div>
-          <div class="feature-card">
-            <h4>EmbeddingDriftSignal</h4>
-            <p>MMD-based drift over embedding spaces.</p>
-          </div>
-          <div class="feature-card">
-            <h4>TokenUncertaintySignal</h4>
-            <p>Per-token entropy from LLM logits.</p>
-          </div>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f5">Copy</button>
-          </div>
-          <pre><code id="f5">from dfre.signals.multimodal import (
-    TextMissingnessSignal, ImageCorruptionSignal,
-    EmbeddingDriftSignal, TokenUncertaintySignal,
-)
-
-M = TextMissingnessSignal().compute(texts)
-V = ImageCorruptionSignal(blur_threshold=100).compute(images)
-D = EmbeddingDriftSignal(reference_embeddings=ref).compute(current_emb)
-U = TokenUncertaintySignal().compute(logits)</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-autocal">
-      <h2>Auto-Calibration <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.6</div>
-          <h3>Rolling-window recalibration</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <p>
-          Continuously re-fit λ, γ, and thresholds from a rolling window of recent batches. Runs on a
-          schedule or is triggered when drift is detected.
-        </p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f6">Copy</button>
-          </div>
-          <pre><code id="f6">from dfre.calibration.auto import AutoCalibrator
-
-calibrator = AutoCalibrator(window_days=90, min_samples=200)
-
-# On every batch, record the snapshot + eventual outcome
-calibrator.observe(snapshot, outcome=1)
-
-# Weekly: recalibrate
-result = calibrator.recalibrate()
-# {
-#   "status": "ok",
-#   "lam": 1.15,
-#   "gamma": 0.92,
-#   "auc": 0.87,
-#   "thresholds": {"low": 0.18, "moderate": 0.41, "high": 0.68},
-# }</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-explain">
-      <h2>Explainability <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.7</div>
-          <h3>Per-batch attributions</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <p>
-          Break down any risk score into its component contributions — base terms, pairwise interactions,
-          and the four-way term.
-        </p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f7">Copy</button>
-          </div>
-          <pre><code id="f7">from dfre.explain import explain_batch
-
-explanation = explain_batch(M=0.35, V=0.20, D=0.30, U=0.40, n=5000)
-print(explanation.summary())
-
-# Risk = 0.391
-# Breakdown:
-#   M (base)              +0.0840
-#   V (base)              +0.0480
-#   D (base)              +0.0720
-#   U (base)              +0.0960
-#   pairwise MV           +0.0270
-#   pairwise VD           +0.0170
-#   pairwise DU           +0.0410
-#   pairwise UM           +0.0360
-#   four-way MVDU         +0.0120
-#   sample_size           -0.0450</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-fused">
-      <h2>Fused Uncertainty <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.8</div>
-          <h3>Drift-weighted uncertainty</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <p>
-          Combine base model uncertainty with drift-driven uncertainty. If the input distribution has
-          drifted, the model's predictions are less trustworthy even if its output entropy is low.
-        </p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f8">Copy</button>
-          </div>
-          <pre><code id="f8">from dfre.signals.fused_uncertainty import FusedUncertaintySignal
-from dfre.signals import UncertaintySignal, DriftSignal
-
-U_fused = FusedUncertaintySignal(
-    base_estimator=UncertaintySignal("entropy"),
-    drift_signal=DriftSignal(["age", "bmi"], scale=0.25),
-    drift_weight=0.4,
-)
-
-U = U_fused.compute(probabilities, reference_batch, current_batch)</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-registry">
-      <h2>Model Registry Integration <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.9</div>
-          <h3>MLflow, W&amp;B, SageMaker</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f9">Copy</button>
-          </div>
-          <pre><code id="f9">from dfre.integrations.mlflow_ext import MLflowDFRE
-
-mlflow_dfre = MLflowDFRE(
-    tracking_uri="http://mlflow:5000",
-    experiment="dfre-production",
-)
-mlflow_dfre.log_model(model, "dfre_model_v5")
-mlflow_dfre.log_batch(snapshot, result)</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-vectorstore">
-      <h2>Vector Store <span class="h2-badge v3">v3</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">3.10</div>
-          <h3>Nearest-neighbor batch history</h3>
-          <span class="feature-tag pill v3">Intelligent</span>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f10">Copy</button>
-          </div>
-          <pre><code id="f10">from dfre.store import DFREVectorStore
-
-store = DFREVectorStore(backend="memory")
-store.upsert(batch_id, snapshot, outcome="ok", embedding=features)
-
-similar = store.query(snapshot, k=20)
-print(f"Found {len(similar)} similar historical batches")</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-         v4 FEATURES
-         ============================================================ -->
-
-    <section id="f-agent">
-      <h2>Agentic DFRE <span class="h2-badge v4">v4</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.1</div>
-          <h3>Autonomous, self-healing pipelines</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
-
-        <p>
-          DFRE becomes an autonomous agent that not only detects risk but takes corrective action:
-          alert, quarantine, retrain, or rollback. All actions are logged for audit.
-        </p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f11">Copy</button>
-          </div>
-          <pre><code id="f11">from dfre.agentic import DFREAgent, AgentPolicy, Action, handlers
-
-def handle_quarantine(snapshot, result):
-    return {"quarantined_batch": snapshot.batch_id, "risk": result.risk}
-
-agent = DFREAgent(
-    policy=AgentPolicy(
-        risk_thresholds={"alert": 0.20, "quarantine": 0.45,
-                         "retrain": 0.55, "rollback": 0.75},
-        dry_run=False,
-    ),
-    action_handlers={
-        Action.QUARANTINE: handle_quarantine,
-        Action.RETRAIN: handlers.retrain_handler,
+result = pipeline.evaluate(
+    incoming, reference, probabilities,
+    context={
+        "freshness": (last_updated,),
+        "volume": (len(incoming),),
     },
+    metadata={"source": "customer_feed"},
+)
+print(result.risk, result.band, result.extra_signals)</code></pre></div>
+        <p class="callout"><strong>Context values:</strong> extra signal inputs use the key passed to <code class="inline-code">with_extra_signal</code>. For volume, pass the current row count; the signal itself has the expected row count.</p>
+      </section>
+
+      <section class="section" id="calibration">
+        <h2 class="section-heading"><span class="section-index">07 /</span> Calibration</h2>
+        <p class="section-intro">Learn interaction parameters and decision thresholds from historical batches with known outcomes. Calibration needs both successful and failed examples; tune against your real false-positive and false-negative costs.</p>
+        <div class="code-block"><div class="code-head"><span>Python · pandas history</span><button class="copy-button" data-copy="calibrationCode" type="button">Copy</button></div><pre><code id="calibrationCode">from dfre import calibrate, calibrate_thresholds
+from dfre.calibration.thresholds import to_policy
+from dfre.core.equation import dfre_array
+
+# history columns: M, V, D, U, failed
+fit = calibrate(history, label_col="failed", cv_folds=5, bootstrap=200)
+scores = dfre_array(
+    history.M.to_numpy(), history.V.to_numpy(),
+    history.D.to_numpy(), history.U.to_numpy(),
+    lam=fit.lam, gamma=fit.gamma,
+)
+thresholds = calibrate_thresholds(
+    history.failed.to_numpy(), scores, cost_fp=1, cost_fn=10,
+)
+policy = to_policy(thresholds)
+
+print(fit.lam, fit.gamma, fit.auc, fit.auc_ci)
+print(policy.to_dict())</code></pre></div>
+        <div class="callout warn"><strong>Do not calibrate on labels invented from the same DFRE score.</strong> That leaks the answer into the target and produces misleading performance. Use downstream incident outcomes and validate on held-out history.</div>
+        <div class="two-col"><div><h3 class="mini-heading">Equation parameters</h3><p>λ controls pairwise interaction strength; γ controls the higher-order product term. Cross-validation helps choose settings that rank historical failures, but it does not guarantee future performance.</p></div><div><h3 class="mini-heading">Decision thresholds</h3><p>Threshold calibration minimizes the specified weighted error cost. Choose <code class="inline-code">cost_fn</code> and <code class="inline-code">cost_fp</code> to reflect your operational consequences.</p></div></div>
+      </section>
+
+      <section class="section" id="explain">
+        <h2 class="section-heading"><span class="section-index">08 /</span> Explain &amp; sensitivity</h2>
+        <p class="section-intro">Use the generalized scorer for named signals. The explanation ranks signal contributions; derivatives and perturbation analyses answer different “what should I fix?” questions.</p>
+        <div class="code-block"><div class="code-head"><span>Python</span><button class="copy-button" data-copy="explainCode" type="button">Copy</button></div><pre><code id="explainCode">import dfre
+
+signals = {"M": 0.08, "V": 0.04, "D": 0.12, "U": 0.20, "freshness": 0.3}
+weights = {"freshness": 0.8}
+
+result = dfre.score_generalized(signals, weights=weights, n=1000)
+explanation = dfre.explain(signals, weights=weights, n=1000)
+print(result.risk, result.band)
+print(explanation.text)
+print("Gradient:", dfre.partial_derivatives(signals, weights=weights, n=1000))
+print("Tornado:", dfre.tornado(signals, weights=weights, n=1000, delta=0.1))
+print("Elasticity:", dfre.elasticity(signals, weights=weights, n=1000))</code></pre></div>
+        <div class="equation-box">Generalized: 1 − exp(−[Σᵢ wᵢsᵢ + λΣᵢ&lt;ⱼ wᵢwⱼsᵢsⱼ + γΠᵢsᵢ] / (1 + √N))<span class="equation-caption">The generalized equation includes all signal pairs. The four-signal classic equation uses its documented cyclic pairs (MV, VD, DU, UM).</span></div>
+      </section>
+
+      <section class="section" id="policy">
+        <h2 class="section-heading"><span class="section-index">09 /</span> Policies &amp; escalation</h2>
+        <p class="section-intro">A Policy maps score ranges to operational bands. Defaults are starting points, not universal safety thresholds.</p>
+        <div class="data-table-wrap"><table><thead><tr><th>Band</th><th>Default risk range</th><th>Default action</th></tr></thead><tbody><tr><td>LOW</td><td>risk &lt; 0.20</td><td>Continue normal monitoring</td></tr><tr><td>MODERATE</td><td>0.20 ≤ risk &lt; 0.45</td><td>Open an investigation alert</td></tr><tr><td>HIGH</td><td>0.45 ≤ risk &lt; 0.70</td><td>Human review and quarantine</td></tr><tr><td>CRITICAL</td><td>risk ≥ 0.70</td><td>Block batch and page on-call</td></tr></tbody></table></div>
+        <div class="code-block"><div class="code-head"><span>Python · stateful escalation</span><button class="copy-button" data-copy="policyCode" type="button">Copy</button></div><pre><code id="policyCode">from dfre import EscalationPolicy, Policy
+
+policy = Policy(low_max=0.18, moderate_max=0.40, high_max=0.68)
+escalator = EscalationPolicy(
+    policy,
+    consecutive=3,
+    escalate_at="HIGH",
+    cooldown=2,
 )
 
-snapshot = dfre.make_snapshot(0.30, 0.30, 0.40, 0.50, 1000)
-result = dfre.score(0.30, 0.30, 0.40, 0.50)
-agent.act(snapshot, result)
-# → {"action": Action.QUARANTINE, "executed": True, "result": {...}}</code></pre>
-        </div>
+for result in batch_results:
+    effective_band = escalator.classify(result.risk)
+    action = escalator.action_for(effective_band)</code></pre></div>
+        <p class="callout">Escalation adds consecutive-breach escalation and hysteresis to reduce alert flapping. It does not execute pipeline actions for you; connect the resulting action to your own controls.</p>
+      </section>
 
-        <h4>Available actions</h4>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Action</th><th>Trigger</th><th>Default behavior</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><span class="pill ok">CONTINUE</span></td><td>𝓡 &lt; 0.20</td><td>Do nothing</td></tr>
-              <tr><td><span class="pill warn">ALERT</span></td><td>0.20 ≤ 𝓡 &lt; 0.45</td><td>Notify channel</td></tr>
-              <tr><td><span class="pill warn">QUARANTINE</span></td><td>0.45 ≤ 𝓡 &lt; 0.55</td><td>Hold batch</td></tr>
-              <tr><td><span class="pill v4">RETRAIN</span></td><td>0.55 ≤ 𝓡 &lt; 0.75</td><td>Trigger retrain</td></tr>
-              <tr><td><span class="pill no">ROLLBACK</span></td><td>𝓡 ≥ 0.75</td><td>Rollback model</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <section class="section" id="monitoring">
+        <h2 class="section-heading"><span class="section-index">10 /</span> Monitoring &amp; reports</h2>
+        <p class="section-intro">Persist scored batches as JSONL, inspect rolling statistics, detect trends, route alert payloads to sinks, and render a self-contained HTML report.</p>
+        <div class="code-block"><div class="code-head"><span>Python</span><button class="copy-button" data-copy="monitorCode" type="button">Copy</button></div><pre><code id="monitorCode">import dfre
 
-        <div class="callout warning">
-          <strong>Human-in-the-loop:</strong> By default, <span class="inline-code">ROLLBACK</span>
-          requires manual approval. Configure <span class="inline-code">require_human_for</span> in
-          <span class="inline-code">AgentPolicy</span> to change this.
-        </div>
-      </div>
-    </section>
+history = dfre.HistoryStore("dfre_history.jsonl")
+router = dfre.AlertRouter().add_sink(dfre.file_sink("alerts.jsonl"))
 
-    <section id="f-federated">
-      <h2>Federated DFRE <span class="h2-badge v4">v4</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.2</div>
-          <h3>Privacy-preserving multi-tenant</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
-
-        <p>
-          Multiple tenants collaborate on DFRE calibration without sharing raw data. Each client
-          computes gradients locally; the server aggregates them.
-        </p>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f12">Copy</button>
-          </div>
-          <pre><code id="f12">from dfre.federated import FederatedDFREServer, FederatedDFREClient
-
-server = FederatedDFREServer(initial_lam=1.0, initial_gamma=1.0, lr=0.1)
-
-clients = [
-    FederatedDFREClient("tenant_a", history_a),
-    FederatedDFREClient("tenant_b", history_b),
-    FederatedDFREClient("tenant_c", history_c),
-]
-
-for round_i in range(50):
-    updates = [c.compute_local_update(server.lam, server.gamma) for c in clients]
-    server.aggregate(updates)
-
-print(f"Global λ = {server.lam:.3f}, γ = {server.gamma:.3f}")</code></pre>
-        </div>
-
-        <div class="callout success">
-          <strong>Compliance:</strong> Raw tenant data never leaves the client. Only
-          gradient vectors are transmitted — GDPR / HIPAA friendly.
-        </div>
-      </div>
-    </section>
-
-    <section id="f-simulator">
-      <h2>Pipeline Simulator <span class="h2-badge v4">v4</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.3</div>
-          <h3>Counterfactual what-if scenarios</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f13">Copy</button>
-          </div>
-          <pre><code id="f13">from dfre.simulator import PipelineSimulator
-
-sim = PipelineSimulator(dfre_model=loaded_model, reference_batch=ref_df)
-
-# Scenario: 2x drift
-scenario_a = sim.run(scenario="double_drift", n_batches=100, seed=42,
-                     transform=lambda M, V, D, U: (M, V, min(1.0, D * 2), U))
-
-# Scenario: retrained model
-scenario_b = sim.run(scenario="retrained_model", n_batches=100, seed=42)
-
-print(sim.compare(scenario_a, scenario_b))
-# {'delta_mean_risk': -0.082, 'delta_alert_rate': -0.124, ...}</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-orchestrator">
-      <h2>Orchestrator Guard <span class="h2-badge v4">v4</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.4</div>
-          <h3>Auto-rollback for model promotion</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f14">Copy</button>
-          </div>
-          <pre><code id="f14">from dfre.orchestrator import DFREOrchestrator
-
-orch = DFREOrchestrator(
-    agent=agent,
-    pipeline="feature_store_daily",
-    block_above=0.45,
-    approve_below=0.20,
+result = dfre.score(0.08, 0.04, 0.12, 0.20, n=1000)
+snapshot = dfre.make_snapshot(
+    0.08, 0.04, 0.12, 0.20, 1000,
+    batch_id="daily-2026-09-26",
+    source="customer_feed",
 )
+history.append(result, batch_id=snapshot.batch_id)
+router.dispatch(snapshot, result)
 
-decision = orch.guard_promotion(snapshot, result)
-# {'decision': 'BLOCKED', 'risk': 0.612, ...}
-# {'decision': 'APPROVED', 'risk': 0.121, ...}
-# {'decision': 'REVIEW', 'risk': 0.340, ...}</code></pre>
-        </div>
-      </div>
-    </section>
+trend = dfre.TrendDetector().analyze(history.risks())
+print(history.stats(), trend.direction, trend.alarm)
 
-    <section id="f-streaming">
-      <h2>Streaming DFRE <span class="h2-badge v4">v4</span></h2>
+html = dfre.generate_html_report(history.load(), title="Daily pipeline risk")
+with open("dfre_report.html", "w", encoding="utf-8") as report:
+    report.write(html)</code></pre></div>
+        <div class="data-table-wrap"><table><thead><tr><th>Component</th><th>Role</th><th>Output</th></tr></thead><tbody><tr><td>HistoryStore</td><td>Append and query scored batch records</td><td>JSONL, statistics, optional DataFrame</td></tr><tr><td>TrendDetector</td><td>Analyze direction, EWMA, CUSUM, slope, and forecast</td><td>Trend report and alarm flag</td></tr><tr><td>AlertRouter</td><td>Dispatch configured bands to sinks</td><td>Logging, file, webhook, or Slack payload</td></tr><tr><td>HTML report</td><td>Render stored monitoring history</td><td>Self-contained report document</td></tr></tbody></table></div>
+      </section>
 
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.5</div>
-          <h3>Real-time Kafka / Flink pipeline</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
+      <section class="section" id="integrations">
+        <h2 class="section-heading"><span class="section-index">11 /</span> Integrations</h2>
+        <p class="section-intro">Optional adapters connect DFRE with common data and serving tools. Install only the extras you need.</p>
+        <div class="data-table-wrap"><table><thead><tr><th>Adapter</th><th>Module / entry point</th><th>Optional extra</th></tr></thead><tbody><tr><td>pandas</td><td><code>dfre.integrations.pandas_ext</code> registers <code>DataFrame.dfre</code></td><td><code>pandas</code></td></tr><tr><td>scikit-learn</td><td><code>DFRETransformer</code> appends a risk feature</td><td><code>calibration</code></td></tr><tr><td>Apache Airflow</td><td><code>DFREScoringOperator</code></td><td><code>airflow</code></td></tr><tr><td>Prometheus</td><td><code>DFREMetrics</code></td><td><code>prometheus</code></td></tr><tr><td>FastAPI</td><td><code>create_app(model)</code>; CLI also exposes <code>dfre serve</code></td><td><code>serve</code></td></tr></tbody></table></div>
+        <div class="link-list"><a href="docs/quickstart.md">Quickstart guide</a><a href="docs/api.md">API reference</a><a href="docs/calibration.md">Calibration guide</a><a href="README.md">Project README</a></div>
+      </section>
 
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f15">Copy</button>
-          </div>
-          <pre><code id="f15">from dfre.streaming import StreamingDFRE
+      <section class="section" id="cli">
+        <h2 class="section-heading"><span class="section-index">12 /</span> Command line</h2>
+        <p class="section-intro">The package installs a <code class="inline-code">dfre</code> command. Run <code class="inline-code">dfre --help</code> for the complete options available in your installed version.</p>
+        <div class="code-block"><div class="code-head"><span>PowerShell</span><button class="copy-button" data-copy="cliCode" type="button">Copy</button></div><pre><code id="cliCode">dfre info
+dfre score --missing 0.08 --invalid 0.04 --drift 0.12 --uncertainty 0.20 --n 1000
+dfre explain --signal M=0.08 --signal V=0.04 --signal D=0.12 --signal U=0.20
+dfre calibrate --history batch_history.csv --label failed --cv-folds 5
+dfre calibrate-thresholds --history batch_history.csv --label failed
+dfre trend --history dfre_history.jsonl
+dfre report --history dfre_history.jsonl --out dfre_report.html
+# Optional serving extra: dfre serve --host 127.0.0.1 --port 8000</code></pre></div>
+      </section>
 
-streaming = StreamingDFRE(
-    input_topic="raw_batches",
-    output_topic="dfre_scores",
-    kafka_bootstrap="kafka:9092",
-    dfre_model=loaded_model,
-    window_seconds=60,
-)
+      <section class="section" id="limits">
+        <h2 class="section-heading"><span class="section-index">13 /</span> Interpretation &amp; limits</h2>
+        <div class="callout warn"><strong>Risk score is not a failure probability.</strong> DFRE produces a bounded composite score. Only empirical calibration against relevant, representative outcomes can establish how scores relate to risk in a specific workflow.</div>
+        <ul class="plain-list"><li>A score summarizes the signals you provide; it cannot detect a failure mode that has no input signal.</li><li>Signal definitions, reference windows, weights, batch size, λ, γ, and policy thresholds all affect results.</li><li>The <code class="inline-code">1 + √N</code> normalization lowers a score as sample size grows; interpret this behavior in the context of your own batch semantics.</li><li>Use incident history for calibration, reserve holdout data for evaluation, and monitor performance as the data changes.</li><li>DFRE is a monitoring and decision-support layer, not a replacement for validation, domain review, or incident-response controls.</li></ul>
+      </section>
 
-# Wire your Kafka consumer loop; call process_message() as the handler
-result = streaming.process_message(raw_bytes)
-print(result["result"].risk)</code></pre>
-        </div>
-      </div>
-    </section>
+      <footer><span>DFRE · Data Failure Risk Equation · v0.2.0</span><span>Open source · Python 3.9+</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <button class="back-top" id="backTop" type="button" aria-label="Back to top" title="Back to top"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" /></svg></button>
 
-    <section id="f-crosscausal">
-      <h2>Cross-Pipeline Causal <span class="h2-badge v4">v4</span></h2>
+  <script>
+    (() => {
+      const coreKeys = ["M", "V", "D", "U"];
+      const extraKeys = ["freshness", "volume", "schema", "outliers"];
+      const cyclicPairs = [["M", "V"], ["V", "D"], ["D", "U"], ["U", "M"]];
+      const defaults = { M: 8, V: 4, D: 12, U: 20, freshness: 30, volume: 15, schema: 0, outliers: 3 };
+      const presets = {
+        routine: { M: 2, V: 1, D: 3, U: 5, freshness: 8, volume: 2, schema: 0, outliers: 1 },
+        watch: { M: 12, V: 8, D: 34, U: 28, freshness: 45, volume: 20, schema: 4, outliers: 10 },
+        incident: { M: 35, V: 30, D: 65, U: 58, freshness: 90, volume: 55, schema: 25, outliers: 38 },
+      };
+      let mode = "classic";
+      let toastTimer;
+      const byId = (id) => document.getElementById(id);
+      const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+      const number = (id, fallback, min, max) => {
+        const parsed = Number(byId(id).value);
+        return Number.isFinite(parsed) ? clamp(parsed, min, max) : fallback;
+      };
+      const showToast = (message) => {
+        const toast = byId("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+      };
 
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.6</div>
-          <h3>Causal inference across pipelines</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f16">Copy</button>
-          </div>
-          <pre><code id="f16">from dfre.causal.cross_pipeline import CrossPipelineCausalDFRE
-
-cross = CrossPipelineCausalDFRE(pipelines=["etl_a", "etl_b", "ml_pipeline"])
-cross.fit({"etl_a": hist_a, "etl_b": hist_b, "ml_pipeline": hist_ml})
-
-# Does upstream ETL failure cause downstream ML degradation?
-effect = cross.intervention(do={"etl_a.M": 0.0}, outcome="failed")
-print(f"Risk reduction: {effect:.3f}")</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-rl">
-      <h2>RL Thresholds <span class="h2-badge v4">v4</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.7</div>
-          <h3>Reinforcement-learned thresholds</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f17">Copy</button>
-          </div>
-          <pre><code id="f17">from dfre.rl import ThresholdRLAgent
-
-rl = ThresholdRLAgent(
-    reward_fn=lambda _, score: score,  # customize with your cost function
-)
-best = rl.train(history_df, episodes=500)
-print(rl.export_policy())
-# {'low': 0.18, 'moderate': 0.42, 'high': 0.71}</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-twin">
-      <h2>Digital Twin <span class="h2-badge v4">v4</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.8</div>
-          <h3>7-day risk forecast</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f18">Copy</button>
-          </div>
-          <pre><code id="f18">from dfre.twin import PipelineDigitalTwin
-
-twin = PipelineDigitalTwin(dfre_model=loaded_model)
-twin.load_state_from_history(history_df)
-
-forecast = twin.forecast(horizon_days=7)
-print(forecast.risk_trajectory)
-# [0.12 0.15 0.21 0.34 0.42 0.51 0.58]</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-nl">
-      <h2>Natural Language Interface <span class="h2-badge v4">v4</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.9</div>
-          <h3>Ask questions in plain English</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f19">Copy</button>
-          </div>
-          <pre><code id="f19">from dfre.nl import NLDFRE
-
-nl = NLDFRE(dfre_model=loaded_model)
-# Optional LLM backend:
-# nl = NLDFRE(dfre_model=model, llm_caller=lambda p: openai_call(p))
-
-print(nl.ask("Is today's batch safe to promote?"))
-print(nl.ask("Why did risk increase by 40% this week?"))
-print(nl.ask("What if we fixed missingness?"))</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <section id="f-zk">
-      <h2>Zero-Knowledge Proofs <span class="h2-badge v4">v4</span></h2>
-
-      <div class="feature-detail">
-        <div class="feature-detail-header">
-          <div class="feature-num">4.10</div>
-          <h3>Prove 𝓡 &lt; threshold without revealing inputs</h3>
-          <span class="feature-tag pill v4">Autonomous</span>
-        </div>
-
-        <div class="code-block">
-          <div class="code-header">
-            <span>python</span>
-            <button class="copy-btn" data-copy="f20">Copy</button>
-          </div>
-          <pre><code id="f20">from dfre.zk import ZKProof, ZKProofVerifier
-
-proof = ZKProof.generate(
-    M=0.08, V=0.04, D=0.12, U=0.20, n=1000,
-    threshold=0.20,
-)
-
-assert ZKProofVerifier.verify(proof, threshold=0.20)
-# ✓ True — proved without revealing inputs</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <!-- INTEGRATIONS -->
-    <section id="integrations">
-      <h2>Integrations</h2>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Framework</th><th>Module</th><th>Install</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>pandas</td><td><span class="inline-code">dfre.integrations.pandas_ext</span></td><td><span class="inline-code">dfre[pandas]</span></td></tr>
-            <tr><td>scikit-learn</td><td><span class="inline-code">dfre.integrations.sklearn_ext</span></td><td><span class="inline-code">dfre[ml]</span></td></tr>
-            <tr><td>Airflow</td><td><span class="inline-code">dfre.integrations.airflow_ext</span></td><td><span class="inline-code">dfre[airflow]</span></td></tr>
-            <tr><td>Prometheus</td><td><span class="inline-code">dfre.integrations.prometheus_ext</span></td><td><span class="inline-code">dfre[prometheus]</span></td></tr>
-            <tr><td>MLflow</td><td><span class="inline-code">dfre.integrations.mlflow_ext</span></td><td><span class="inline-code">dfre[mlflow]</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- FEATURE MATRIX -->
-    <section id="matrix">
-      <h2>Feature Matrix</h2>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Feature</th>
-              <th>v3</th>
-              <th>v4</th>
-              <th>v5</th>
-              <th>Category</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>Core equation</td><td>✅</td><td>✅</td><td>✅</td><td>Core</td></tr>
-            <tr><td>Signals (M, V, D, U)</td><td>✅</td><td>✅</td><td>✅</td><td>Signals</td></tr>
-            <tr><td>Learned λ, γ</td><td>✅</td><td>✅</td><td>✅</td><td>ML</td></tr>
-            <tr><td>Bayesian uncertainty</td><td>✅</td><td>✅</td><td>✅</td><td>ML</td></tr>
-            <tr><td>Causal inference</td><td>✅</td><td>✅</td><td>✅</td><td>Causal</td></tr>
-            <tr><td>Temporal LSTM</td><td>✅</td><td>✅</td><td>✅</td><td>Temporal</td></tr>
-            <tr><td>Multi-modal signals</td><td>✅</td><td>✅</td><td>✅</td><td>Signals</td></tr>
-            <tr><td>Auto-calibration</td><td>✅</td><td>✅</td><td>✅</td><td>Calibration</td></tr>
-            <tr><td>Explainability</td><td>✅</td><td>✅</td><td>✅</td><td>XAI</td></tr>
-            <tr><td>Fused uncertainty</td><td>✅</td><td>✅</td><td>✅</td><td>Signals</td></tr>
-            <tr><td>Model registry</td><td>✅</td><td>✅</td><td>✅</td><td>Integration</td></tr>
-            <tr><td>Vector store</td><td>✅</td><td>✅</td><td>✅</td><td>Storage</td></tr>
-            <tr><td>Agentic actions</td><td>—</td><td>✅</td><td>✅</td><td>Autonomy</td></tr>
-            <tr><td>Federated learning</td><td>—</td><td>✅</td><td>✅</td><td>Privacy</td></tr>
-            <tr><td>Pipeline simulator</td><td>—</td><td>✅</td><td>✅</td><td>Simulation</td></tr>
-            <tr><td>Orchestrator guard</td><td>—</td><td>✅</td><td>✅</td><td>Autonomy</td></tr>
-            <tr><td>Streaming DFRE</td><td>—</td><td>✅</td><td>✅</td><td>Streaming</td></tr>
-            <tr><td>Cross-pipeline causal</td><td>—</td><td>✅</td><td>✅</td><td>Causal</td></tr>
-            <tr><td>RL thresholds</td><td>—</td><td>✅</td><td>✅</td><td>RL</td></tr>
-            <tr><td>Digital twin</td><td>—</td><td>✅</td><td>✅</td><td>Simulation</td></tr>
-            <tr><td>NL interface</td><td>—</td><td>✅</td><td>✅</td><td>LLM</td></tr>
-            <tr><td>Zero-knowledge proofs</td><td>—</td><td>✅</td><td>✅</td><td>Crypto</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- API CHEATSHEET -->
-    <section id="api">
-      <h2>API Cheatsheet</h2>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Call</th><th>Purpose</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><span class="inline-code">dfre.score(M, V, D, U)</span></td><td>One-line risk score</td></tr>
-            <tr><td><span class="inline-code">dfre.DFRE(lam, gamma)</span></td><td>Stateful scorer</td></tr>
-            <tr><td><span class="inline-code">dfre.DFREBuilder()</span></td><td>Composable pipeline</td></tr>
-            <tr><td><span class="inline-code">dfre.MissingnessSignal()</span></td><td>M signal</td></tr>
-            <tr><td><span class="inline-code">dfre.InvaliditySignal(rules)</span></td><td>V signal</td></tr>
-            <tr><td><span class="inline-code">dfre.DriftSignal(cols, scale)</span></td><td>D signal</td></tr>
-            <tr><td><span class="inline-code">dfre.UncertaintySignal()</span></td><td>U signal</td></tr>
-            <tr><td><span class="inline-code">dfre.calibrate(history)</span></td><td>Fit λ, γ</td></tr>
-            <tr><td><span class="inline-code">dfre.calibrate_thresholds(...)</span></td><td>Fit bands</td></tr>
-            <tr><td><span class="inline-code">dfre.BayesianDFRE().score(...)</span></td><td>Credible intervals</td></tr>
-            <tr><td><span class="inline-code">dfre.CausalDFRE().fit(h)</span></td><td>Intervention ranking</td></tr>
-            <tr><td><span class="inline-code">dfre.DFREAgent(...).act(...)</span></td><td>Autonomous actions</td></tr>
-            <tr><td><span class="inline-code">dfre.PipelineSimulator().run(...)</span></td><td>Counterfactual scenarios</td></tr>
-            <tr><td><span class="inline-code">dfre.PipelineDigitalTwin()</span></td><td>7-day forecast</td></tr>
-            <tr><td><span class="inline-code">dfre.NLDFRE().ask(query)</span></td><td>Natural language</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- MIGRATION -->
-    <section id="migration">
-      <h2>Migration Guide</h2>
-
-      <h3>v2 → v3</h3>
-      <ul>
-        <li><span class="inline-code">dfre.score()</span> now returns <span class="inline-code">DFREResult</span> — use <span class="inline-code">.risk</span> attribute.</li>
-        <li>Default <span class="inline-code">lam</span>, <span class="inline-code">gamma</span> can be <span class="inline-code">None</span> (auto-learned) — pass explicit values for v2 behavior.</li>
-        <li><span class="inline-code">DriftSignal.statistic</span> default changed to <span class="inline-code">"auto"</span> — pass explicit <span class="inline-code">"psi"</span> for v2 behavior.</li>
-      </ul>
-
-      <h3>v3 → v4</h3>
-      <ul>
-        <li><span class="inline-code">DFREAgent</span> is opt-in — old code works unchanged.</li>
-        <li>Streaming API introduces <span class="inline-code">StreamingDFRE</span> — batch API unchanged.</li>
-        <li>Federated learning is opt-in.</li>
-      </ul>
-
-      <h3>v4 → v5</h3>
-      <ul>
-        <li>All v3 and v4 features are now unified — no breaking changes from either.</li>
-        <li>Single <span class="inline-code">pip install "dfre[all]"</span> gets everything.</li>
-        <li>Optional dependencies remain optional.</li>
-      </ul>
-    </section>
-
-    <!-- ROADMAP -->
-    <section id="roadmap">
-      <h2>Roadmap</h2>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Version</th><th>Codename</th><th>Status</th><th>Released</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>v0.1</td><td>Foundation</td><td><span class="pill ok">Released</span></td><td>Q1 2026</td></tr>
-            <tr><td>v1.0</td><td>Stable</td><td><span class="pill ok">Released</span></td><td>Q2 2026</td></tr>
-            <tr><td>v2.0</td><td>Enterprise</td><td><span class="pill ok">Released</span></td><td>Q4 2026</td></tr>
-            <tr><td>v3.0</td><td>Intelligent</td><td><span class="pill ok">Released</span></td><td>Q2 2027</td></tr>
-            <tr><td>v4.0</td><td>Autonomous</td><td><span class="pill ok">Released</span></td><td>Q4 2027</td></tr>
-            <tr><td><strong>v5.0</strong></td><td><strong>Unified</strong></td><td><span class="pill v4">Current</span></td><td>Q1 2028</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-      <p>𝓡 dfre v5.0 — Data Failure Risk Equation</p>
-      <p>Built with care. Open source under MIT license.</p>
-    </footer>
-
-  </main>
-</div>
-
-<!-- Back-to-top -->
-<button class="back-top" id="backTop" aria-label="Back to top">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 19V5M5 12l7-7 7 7"/>
-  </svg>
-</button>
-
-<script>
-/* ============================================================
-   TAB SWITCHING
-   ============================================================ */
-document.querySelectorAll(".tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    const target = tab.dataset.tab;
-    const parent = tab.closest("section");
-
-    parent.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    parent.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-
-    tab.classList.add("active");
-    const panel = parent.querySelector(`.tab-panel[data-panel="${target}"]`);
-    if (panel) panel.classList.add("active");
-  });
-});
-
-/* ============================================================
-   COPY CODE
-   ============================================================ */
-document.querySelectorAll(".copy-btn").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    const id = btn.dataset.copy;
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    const text = el.innerText;
-    try {
-      await navigator.clipboard.writeText(text);
-      const original = btn.textContent;
-      btn.textContent = "Copied!";
-      btn.classList.add("copied");
-      setTimeout(() => {
-        btn.textContent = original;
-        btn.classList.remove("copied");
-      }, 1400);
-    } catch {
-      btn.textContent = "Failed";
-      setTimeout(() => (btn.textContent = "Copy"), 1400);
-    }
-  });
-});
-
-/* ============================================================
-   SIDEBAR ACTIVE STATE
-   ============================================================ */
-const sidebarLinks = [...document.querySelectorAll(".sidebar-list a")];
-const sections = sidebarLinks
-  .map(a => document.querySelector(a.getAttribute("href")))
-  .filter(Boolean);
-
-if ("IntersectionObserver" in window) {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        sidebarLinks.forEach(a => a.classList.remove("active"));
-        const active = document.querySelector(
-          `.sidebar-list a[href="#${entry.target.id}"]`
-        );
-        if (active) active.classList.add("active");
+      function currentSignals() {
+        const keys = mode === "classic" ? coreKeys : coreKeys.concat(extraKeys);
+        return Object.fromEntries(keys.map((key) => [key, number(`${key}-number`, defaults[key], 0, 100) / 100]));
       }
-    });
-  }, { rootMargin: "-15% 0px -70% 0px", threshold: 0 });
 
-  sections.forEach(s => observer.observe(s));
-}
+      function currentWeights() {
+        return Object.fromEntries(extraKeys.map((key) => [key, number(`${key}-weight`, 1, 0, 10)]));
+      }
 
-/* ============================================================
-   SMOOTH SCROLL + CLOSE MOBILE SIDEBAR
-   ============================================================ */
-sidebarLinks.forEach(a => {
-  a.addEventListener("click", () => {
-    if (window.innerWidth <= 860) {
-      document.getElementById("sidebar").classList.remove("open");
-      document.getElementById("backdrop").classList.remove("show");
-    }
-  });
-});
+      function normalizeThresholds() {
+        const low = Math.round(number("lowMax", 0.2, 0, 1) * 100) / 100;
+        const moderate = Math.max(low, Math.round(number("moderateMax", 0.45, 0, 1) * 100) / 100);
+        const high = Math.max(moderate, Math.round(number("highMax", 0.7, 0, 1) * 100) / 100);
+        byId("lowMax").value = low.toFixed(2);
+        byId("moderateMax").value = moderate.toFixed(2);
+        byId("highMax").value = high.toFixed(2);
+        calculate();
+      }
 
-/* ============================================================
-   MOBILE MENU TOGGLE
-   ============================================================ */
-const menuToggle = document.getElementById("menuToggle");
-const sidebar = document.getElementById("sidebar");
-const backdrop = document.getElementById("backdrop");
+      function calculate() {
+        const signals = currentSignals();
+        const weights = currentWeights();
+        const sampleSize = Math.max(1, Math.floor(number("sampleSize", 1000, 1, 1e12)));
+        const lambda = number("lambda", 1, 0, 1e6);
+        const gamma = number("gamma", 1, 0, 1e6);
+        const low = number("lowMax", 0.2, 0, 1);
+        const moderate = Math.max(low, number("moderateMax", 0.45, 0, 1));
+        const high = Math.max(moderate, number("highMax", 0.7, 0, 1));
+        const keys = Object.keys(signals);
+        const weighted = (key) => (mode === "classic" || coreKeys.includes(key) ? 1 : weights[key]) * signals[key];
+        const main = keys.reduce((sum, key) => sum + weighted(key), 0);
+        const pairs = mode === "classic"
+          ? cyclicPairs
+          : keys.flatMap((left, index) => keys.slice(index + 1).map((right) => [left, right]));
+        const pairwise = lambda * pairs.reduce((sum, [left, right]) => {
+          const leftWeight = mode === "classic" || coreKeys.includes(left) ? 1 : weights[left];
+          const rightWeight = mode === "classic" || coreKeys.includes(right) ? 1 : weights[right];
+          return sum + leftWeight * rightWeight * signals[left] * signals[right];
+        }, 0);
+        const product = keys.reduce((value, key) => value * signals[key], 1);
+        const higher = gamma * product;
+        const intensity = (main + pairwise + higher) / (1 + Math.sqrt(sampleSize));
+        const risk = 1 - Math.exp(-intensity);
+        const band = risk < low ? "LOW" : risk < moderate ? "MODERATE" : risk < high ? "HIGH" : "CRITICAL";
+        const actions = { LOW: "Continue normal monitoring", MODERATE: "Open an investigation alert", HIGH: "Human review and quarantine", CRITICAL: "Block batch and page on-call" };
+        const colors = { LOW: "var(--mint)", MODERATE: "var(--blue)", HIGH: "var(--orange)", CRITICAL: "var(--red)" };
+        const bandTag = byId("bandTag");
+        bandTag.textContent = band;
+        bandTag.style.color = colors[band];
+        byId("actionText").textContent = actions[band];
+        byId("riskValue").textContent = risk.toFixed(3);
+        byId("riskRing").style.setProperty("--progress", `${risk * 360}deg`);
+        byId("riskRing").style.setProperty("--band-color", colors[band]);
+        byId("riskRing").setAttribute("aria-label", `${band} risk score ${risk.toFixed(3)}`);
+        byId("modeLabel").textContent = mode === "classic" ? "CORE EQUATION" : "GENERALIZED · ALL PAIRS";
+        byId("resultExplainer").textContent = mode === "classic"
+          ? `Core equation · ${sampleSize.toLocaleString()} observations · four cyclic interactions.`
+          : `Generalized equation · ${sampleSize.toLocaleString()} observations · ${pairs.length} pairwise interactions.`;
+        const components = [["main", main], ["pair", pairwise], ["higher", higher], ["normalized", intensity]];
+        const scale = Math.max(main, pairwise, higher, intensity, 0.0001);
+        for (const [key, value] of components) {
+          byId(`${key}Value`).textContent = value.toFixed(3);
+          byId(`${key}Fill`).style.width = `${Math.min(100, value / scale * 100)}%`;
+          byId(`${key}Fill`).style.background = colors[band];
+        }
+        window.dfreWorkbench = { mode, signals, weights, sampleSize, lambda, gamma, risk, band };
+      }
 
-menuToggle.addEventListener("click", () => {
-  sidebar.classList.toggle("open");
-  backdrop.classList.toggle("show");
-});
+      function setSignal(key, value) {
+        const safeValue = Math.round(clamp(Number(value) || 0, 0, 100));
+        byId(`${key}-range`).value = String(safeValue);
+        byId(`${key}-number`).value = String(safeValue);
+      }
 
-backdrop.addEventListener("click", () => {
-  sidebar.classList.remove("open");
-  backdrop.classList.remove("show");
-});
+      document.querySelectorAll("[data-range]").forEach((input) => input.addEventListener("input", () => {
+        byId(`${input.dataset.range}-number`).value = input.value;
+        calculate();
+      }));
+      document.querySelectorAll("[data-number]").forEach((input) => {
+        input.addEventListener("input", () => {
+          const value = clamp(Number(input.value) || 0, 0, 100);
+          byId(`${input.dataset.number}-range`).value = String(value);
+          calculate();
+        });
+        input.addEventListener("change", () => {
+          input.value = String(clamp(Number(input.value) || 0, 0, 100));
+          calculate();
+        });
+      });
+      document.querySelectorAll("[data-weight]").forEach((input) => input.addEventListener("input", calculate));
+      ["sampleSize", "lambda", "gamma", "lowMax", "moderateMax", "highMax"].forEach((id) => {
+        byId(id).addEventListener("input", calculate);
+        byId(id).addEventListener("change", calculate);
+      });
+      ["lowMax", "moderateMax", "highMax"].forEach((id) => byId(id).addEventListener("change", normalizeThresholds));
+      document.querySelectorAll("[data-mode]").forEach((button) => button.addEventListener("click", () => {
+        mode = button.dataset.mode;
+        document.querySelectorAll("[data-mode]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        byId("extraSignals").hidden = mode !== "generalized";
+        calculate();
+      }));
+      document.querySelectorAll("[data-preset]").forEach((button) => button.addEventListener("click", () => {
+        Object.entries(presets[button.dataset.preset]).forEach(([key, value]) => setSignal(key, value));
+        if (button.dataset.preset === "incident") document.querySelector('[data-mode="generalized"]').click();
+        calculate();
+      }));
+      byId("resetInputs").addEventListener("click", () => {
+        Object.entries(defaults).forEach(([key, value]) => setSignal(key, value));
+        byId("sampleSize").value = "1000";
+        byId("lambda").value = "1";
+        byId("gamma").value = "1";
+        byId("lowMax").value = "0.20";
+        byId("moderateMax").value = "0.45";
+        byId("highMax").value = "0.70";
+        document.querySelector('[data-mode="classic"]').click();
+        calculate();
+      });
+      byId("exportJson").addEventListener("click", () => {
+        const data = { ...window.dfreWorkbench, thresholds: { low_max: number("lowMax", .2, 0, 1), moderate_max: number("moderateMax", .45, 0, 1), high_max: number("highMax", .7, 0, 1) } };
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+        link.download = "dfre-score-inputs.json";
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast("Score inputs exported");
+      });
 
-/* ============================================================
-   SEARCH
-   ============================================================ */
-const searchInput = document.getElementById("searchInput");
-if (searchInput) {
-  searchInput.addEventListener("input", (e) => {
-    const q = e.target.value.toLowerCase().trim();
-    if (!q) return;
-    const firstMatch = sidebarLinks.find(a =>
-      a.textContent.toLowerCase().includes(q)
-    );
-    if (firstMatch && q.length >= 2) {
-      // Optional: auto-scroll to first match
-      // firstMatch.click();
-    }
-  });
+      document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((item) => item.setAttribute("aria-selected", String(item === tab)));
+        document.querySelectorAll(".tab-panel").forEach((panel) => { panel.hidden = panel.id !== tab.getAttribute("aria-controls"); });
+      }));
+      document.querySelectorAll(".copy-button").forEach((button) => button.addEventListener("click", async () => {
+        const target = byId(button.dataset.copy);
+        if (!target) return;
+        try {
+          await navigator.clipboard.writeText(target.innerText);
+          button.classList.add("copied");
+          button.textContent = "Copied";
+          setTimeout(() => { button.classList.remove("copied"); button.textContent = "Copy"; }, 1300);
+        } catch { showToast("Clipboard access is unavailable in this browser"); }
+      }));
 
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const q = e.target.value.toLowerCase().trim();
-      const match = sidebarLinks.find(a =>
-        a.textContent.toLowerCase().includes(q)
-      );
-      if (match) match.click();
-    }
-  });
-}
+      const sidebar = byId("sidebar");
+      const backdrop = byId("backdrop");
+      const menuToggle = byId("menuToggle");
+      const closeMenu = () => {
+        sidebar.classList.remove("open");
+        backdrop.classList.remove("show");
+        menuToggle.setAttribute("aria-expanded", "false");
+      };
+      menuToggle.addEventListener("click", () => {
+        const open = sidebar.classList.toggle("open");
+        backdrop.classList.toggle("show", open);
+        menuToggle.setAttribute("aria-expanded", String(open));
+      });
+      backdrop.addEventListener("click", closeMenu);
+      const navLinks = [...document.querySelectorAll(".side-list a")];
+      navLinks.forEach((link) => link.addEventListener("click", closeMenu));
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          navLinks.forEach((link) => link.classList.toggle("active", link.hash === `#${entry.target.id}`));
+        }), { rootMargin: "-15% 0px -72% 0px" });
+        document.querySelectorAll("main section[id]").forEach((section) => observer.observe(section));
+      }
 
-/* ============================================================
-   BACK TO TOP
-   ============================================================ */
-const backTop = document.getElementById("backTop");
-window.addEventListener("scroll", () => {
-  backTop.classList.toggle("show", window.scrollY > 600);
-}, { passive: true });
-
-backTop.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-});
-
-/* ============================================================
-   KEYBOARD NAVIGATION
-   ============================================================ */
-document.addEventListener("keydown", (e) => {
-  // Focus search on "/" or Ctrl/Cmd+K
-  if ((e.key === "/" && !isInputFocused()) ||
-      ((e.ctrlKey || e.metaKey) && e.key === "k")) {
-    e.preventDefault();
-    if (searchInput) searchInput.focus();
-  }
-  // Escape closes sidebar
-  if (e.key === "Escape") {
-    sidebar.classList.remove("open");
-    backdrop.classList.remove("show");
-    if (searchInput) searchInput.blur();
-  }
-});
-
-function isInputFocused() {
-  const el = document.activeElement;
-  return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA");
-}
-
-/* ============================================================
-   INIT
-   ============================================================ */
-console.log("dfre v5.0 docs loaded ✓");
-</script>
-
+      const search = byId("searchInput");
+      search.addEventListener("input", () => {
+        const query = search.value.trim().toLowerCase();
+        navLinks.forEach((link) => {
+          const target = document.querySelector(link.hash);
+          const matches = !query || `${link.textContent} ${target?.textContent || ""}`.toLowerCase().includes(query);
+          link.parentElement.hidden = !matches;
+        });
+      });
+      search.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        const query = search.value.trim().toLowerCase();
+        const match = navLinks.find((link) => !link.parentElement.hidden);
+        if (match) { match.click(); search.blur(); }
+      });
+      document.addEventListener("keydown", (event) => {
+        const focused = ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName);
+        if ((event.key === "/" && !focused) || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k")) {
+          event.preventDefault();
+          search.focus();
+        }
+        if (event.key === "Escape") { closeMenu(); search.blur(); }
+      });
+      const backTop = byId("backTop");
+      window.addEventListener("scroll", () => backTop.classList.toggle("show", window.scrollY > 700), { passive: true });
+      backTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+      calculate();
+    })();
+  </script>
 </body>
 </html>
